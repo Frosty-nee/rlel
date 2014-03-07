@@ -1,0 +1,12 @@
+﻿<UserControl x:Class="rlel.Group"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" Height="36" Width="405">
+    <Grid>
+        <TextBox Name="groupName" Height="23" Width="189" HorizontalAlignment="Left" Margin="12,6,0,6" />
+        <Button Name="configure" Content="Configure" Click="configure_Click" Height="23" Width="90" HorizontalAlignment="Left" Margin="207,6,0,6" />
+        <Button Name="launch" Content="Launch" Click="launch_Click" Height="23" Width="90" HorizontalAlignment="Left" Margin="303,6,0,6" />
+    </Grid>
+</UserControl>
