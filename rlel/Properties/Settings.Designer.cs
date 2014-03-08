@@ -84,36 +84,13 @@ namespace rlel.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringCollection groups {
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool autoPatch {
             get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["groups"]));
+                return ((bool)(this["autoPatch"]));
             }
             set {
-                this["groups"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int tranqVersion {
-            get {
-                return ((int)(this["tranqVersion"]));
-            }
-            set {
-                this["tranqVersion"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int sisiVersion {
-            get {
-                return ((int)(this["sisiVersion"]));
-            }
-            set {
-                this["sisiVersion"] = value;
+                this["autoPatch"] = value;
             }
         }
     }

@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Rapid Light EVE Launcher" Height="383" Width="425" ResizeMode="CanMinimize" Icon="/rlel;component/rlel.ico" Loaded="Window_Loaded" Closing="Window_Closing" WindowStartupLocation="CenterScreen" StateChanged="Window_StateChanged" >
     <Grid>
+        <CheckBox Name="autoUpdate" Content="Patch EVE automatically" Click="autoUpdate_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="12,41,0,0" />
         <TextBox Name="evePath" Height="23" Width="220" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="12,12,0,0" TextChanged="evePath_TextChanged" />
-        <Button Name="settings" Click="settings_Click" Content="Settings" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" Margin="12,41,0,0" />
         <CheckBox Name="singularity" Content="Singularity" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,15,92,0" Click="singularity_Click"/>
         <Button Content="Browse" Name="browse" Click="browse_Click" HorizontalAlignment="Right" VerticalAlignment="Top" Height="23" Width="70" Margin="0,12,12,0" />
         <ScrollViewer Name="accountViewer" VerticalAlignment="Top" Height="235" Margin="0,67,0,0">

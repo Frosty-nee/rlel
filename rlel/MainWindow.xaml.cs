@@ -101,11 +101,15 @@ namespace rlel {
             this.popContextMenu();
             this.tray.Visible = true;
             this.saveAccounts = true;
+            this.checkUpdate = new Timer(36000000);
+            this.checkUpdate.Elapsed += new ElapsedEventHandler(checkUpdate_Elapsed);
+            this.autoUpdate.IsChecked = Properties.Settings.Default.autoPatch;
         }
 
-        private void addSisiToTray() {
-
+        void checkUpdate_Elapsed(object sender, ElapsedEventArgs e) {
+            this.checkClientVersion();
         }
+
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
             this.tray.Visible = false;
@@ -269,5 +273,69 @@ namespace rlel {
             Properties.Settings.Default.Save();
             this.popContextMenu();
         }
+
+
+        private void updateEveVersion() {
+            //just walk away now, you don't want to see this
+            if (DateTime.UtcNow > this.updateCheckExpire) {
+                System.Net.WebClient wc = new System.Net.WebClient();
+                string ds = wc.DownloadString(new Uri("http://client.eveonline.com/patches/premium_patchinfoTQ_inc.txt"));
+                this.tranqVersion = Convert.ToInt32(ds.Substring(6, 6));
+                wc.Dispose();
+
+                ds = wc.DownloadString(new Uri("http://client.eveonline.com/patches/premium_patchinfoSISI_inc.txt"));
+                this.sisiVersion = Convert.ToInt32(ds.Substring(6,6));
+                this.updateCheckExpire = (DateTime.UtcNow + TimeSpan.FromHours(1));
+            }
+        }
+
+        private void checkClientVersion() {
+            this.updateEveVersion();
+            StreamReader sr = new StreamReader(String.Format("{0}\\{1}", Properties.Settings.Default.TranqPath, "start.ini"));
+            List<string> lines = new List<string>();
+            while (!sr.EndOfStream) {
+                lines.Add(sr.ReadLine());
+            }
+            sr.Close();
+            int clientVers = Convert.ToInt32(lines[2].Substring(8));
+            if (this.tranqVersion != clientVers) {
+                this.patch(1);
+            }
+
+            sr = new StreamReader(String.Format("{0}\\{1}", Properties.Settings.Default.SisiPath, "start.ini"));
+            lines.Clear();
+            while (!sr.EndOfStream) {
+                lines.Add(sr.ReadLine());
+            }
+            sr.Close();
+            clientVers = Convert.ToInt32(lines[2].Substring(8));
+            if (this.sisiVersion != clientVers) {
+                this.patch(2);
+            }
+        }
+
+        private void patch(int install) {
+            System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\repair.exe", "-c");
+            if (install == 1) {
+                repair.WorkingDirectory = Properties.Settings.Default.TranqPath;
+            }
+            if (install == 2) {
+                repair.WorkingDirectory = Properties.Settings.Default.SisiPath;
+            }
+            System.Diagnostics.Process.Start(repair);
+       }
+
+        private void autoUpdate_Click(object sender, RoutedEventArgs e) {
+            if (autoUpdate.IsChecked == true) {
+                this.checkClientVersion();
+                this.checkUpdate.Enabled = true;
+            }
+            if (autoUpdate.IsChecked == false) {
+                this.checkUpdate.Enabled = false;
+            }
+            Properties.Settings.Default.autoPatch = Convert.ToBoolean(autoUpdate.IsChecked);
+            Properties.Settings.Default.Save();
+        }
+
     }
 }
