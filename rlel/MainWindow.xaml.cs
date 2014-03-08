@@ -16,7 +16,8 @@ namespace rlel {
     public partial class MainWindow : Window {
         System.Windows.Forms.NotifyIcon tray;
         bool saveAccounts = false;
-        int eveVersion;
+        int tranqVersion;
+        int sisiVersion;
         EventHandler contextMenuClick;
         DateTime updateCheckExpire = new DateTime();
         Timer checkUpdate;
@@ -71,12 +72,13 @@ namespace rlel {
             this.tray.ContextMenu = new System.Windows.Forms.ContextMenu();
             this.tray.MouseClick += new System.Windows.Forms.MouseEventHandler(this.tray_Click);
             this.contextMenuClick = new EventHandler(this.contextMenu_Click);
-            this.tray.ContextMenu.MenuItems.Add("launch all", this.contextMenuClick);
+            this.tray.ContextMenu.MenuItems.Add("Singularity", this.contextMenuClick);
             this.tray.ContextMenu.MenuItems.Add("-");
             if (Properties.Settings.Default.accounts != null) {
                 this.popAccounts();
             }
             this.tray.ContextMenu.MenuItems.Add("-");
+            // don't support groups yet
             /* if (Properties.Settings.Default.groups != null) {
                 foreach (string gp in Properties.Settings.Default.groups) {
                     Group G = new Group(this);
@@ -99,6 +101,10 @@ namespace rlel {
             this.popContextMenu();
             this.tray.Visible = true;
             this.saveAccounts = true;
+        }
+
+        private void addSisiToTray() {
+
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
@@ -214,9 +220,10 @@ namespace rlel {
 
         private void contextMenu_Click(object sender, EventArgs e) {
             string username = ((System.Windows.Forms.MenuItem)sender).Text;
-            if (username == "launch all")
-                foreach (Account account in this.accountsPanel.Children)
-                    account.launchAccount();
+            if (username == "Singularity") {
+                this.singularity.IsChecked = !this.singularity.IsChecked;
+                ((System.Windows.Forms.MenuItem)sender).Checked = Convert.ToBoolean(this.singularity.IsChecked);
+            }
             else {
                 foreach (Account account in this.accountsPanel.Children) {
                     if (account.username.Text == username) {

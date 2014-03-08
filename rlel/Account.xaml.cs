@@ -57,10 +57,10 @@ namespace rlel {
             this.main.showBalloon("logging in", "launching", System.Windows.Forms.ToolTipIcon.None);
             string args;
             if (this.main.singularity.IsChecked == true) {
-                args = @"/server:Singularity /noconsole /ssoToken={0}";
+                args = @"/server:Singularity /triPlatform=dx11 /noconsole /ssoToken={0}";
             }
             else {
-                args = @"/noconsole /ssoToken={0}";
+                args = @"/noconsole /triPlatform=dx11 /ssoToken={0}";
             }
             System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo(
                 @".\bin\ExeFile.exe", String.Format(args, ssoToken)

@@ -92,5 +92,29 @@ namespace rlel.Properties {
                 this["groups"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int tranqVersion {
+            get {
+                return ((int)(this["tranqVersion"]));
+            }
+            set {
+                this["tranqVersion"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int sisiVersion {
+            get {
+                return ((int)(this["sisiVersion"]));
+            }
+            set {
+                this["sisiVersion"] = value;
+            }
+        }
     }
 }
