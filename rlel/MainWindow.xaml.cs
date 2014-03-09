@@ -276,16 +276,15 @@ namespace rlel {
 
 
         private void updateEveVersion() {
-            //just walk away now, you don't want to see this
             if (DateTime.UtcNow > this.updateCheckExpire) {
                 System.Net.WebClient wc = new System.Net.WebClient();
                 string ds = wc.DownloadString(new Uri("http://client.eveonline.com/patches/premium_patchinfoTQ_inc.txt"));
                 this.tranqVersion = Convert.ToInt32(ds.Substring(6, 6));
-                wc.Dispose();
 
                 ds = wc.DownloadString(new Uri("http://client.eveonline.com/patches/premium_patchinfoSISI_inc.txt"));
                 this.sisiVersion = Convert.ToInt32(ds.Substring(6,6));
                 this.updateCheckExpire = (DateTime.UtcNow + TimeSpan.FromHours(1));
+                wc.Dispose();
             }
         }
 
@@ -315,14 +314,18 @@ namespace rlel {
         }
 
         private void patch(int install) {
-            System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\repair.exe", "-c");
+
             if (install == 1) {
+                System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\repair.exe", "-c");
                 repair.WorkingDirectory = Properties.Settings.Default.TranqPath;
+                System.Diagnostics.Process.Start(repair);
             }
             if (install == 2) {
+                System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\repair.exe","--server=singularity -c");
                 repair.WorkingDirectory = Properties.Settings.Default.SisiPath;
+                System.Diagnostics.Process.Start(repair);
             }
-            System.Diagnostics.Process.Start(repair);
+
        }
 
         private void autoUpdate_Click(object sender, RoutedEventArgs e) {

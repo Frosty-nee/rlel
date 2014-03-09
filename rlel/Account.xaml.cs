@@ -57,15 +57,21 @@ namespace rlel {
             this.main.showBalloon("logging in", "launching", System.Windows.Forms.ToolTipIcon.None);
             string args;
             if (this.main.singularity.IsChecked == true) {
-                args = @"/server:Singularity /triPlatform=dx11 /noconsole /ssoToken={0}";
+                args = @"/noconsole /ssoToken={0} /triPlatform=dx11 /server:Singularity";
+                
             }
             else {
-                args = @"/noconsole /triPlatform=dx11 /ssoToken={0}";
+                args = @"/noconsole /ssoToken={0} /triPlatform=dx11";
             }
             System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo(
                 @".\bin\ExeFile.exe", String.Format(args, ssoToken)
             );
-            psi.WorkingDirectory = this.main.evePath.Text;
+            if (this.main.singularity.IsChecked == true) {
+                psi.WorkingDirectory = Properties.Settings.Default.SisiPath;
+            }
+            else {
+                psi.WorkingDirectory = Properties.Settings.Default.TranqPath;
+            }
             System.Diagnostics.Process.Start(psi);
             return true;
         }
@@ -73,11 +79,20 @@ namespace rlel {
         private string getAccessToken(string username, string password) {
             if (this.accessToken != null && DateTime.UtcNow < this.accessTokenExpiration)
                 return this.accessToken;
-            const string uri = "https://login.eveonline.com/Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Flogin.eveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken";
+            string uri = "https://login.eveonline.com/Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Flogin.eveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken";
+            if (this.main.singularity.IsChecked == true) {
+                uri = "https://sisilogin.testeveonline.com//Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Fsisilogin.testeveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken";
+               }
+
             HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(uri);
             req.Timeout = 5000;
             req.AllowAutoRedirect = true;
-            req.Headers.Add("Origin", "https://login.eveonline.com");
+            if (this.main.singularity.IsChecked == false) {
+                req.Headers.Add("Origin", "https://login.eveonline.com");
+            }
+            else {
+                req.Headers.Add("Origin", "https://sisilogin.testeveonline.com");
+            }
             req.Referer = uri;
             req.CookieContainer = new CookieContainer(8);
             req.Method = "POST";
@@ -98,9 +113,15 @@ namespace rlel {
 
         private string getSSOToken(string username, string password) {
             string accessToken = this.getAccessToken(username, password);
+            string uri;
             if (accessToken == null)
                 return null;
-            string uri = "https://login.eveonline.com/launcher/token?accesstoken=" + accessToken;
+            if (this.main.singularity.IsChecked == false) {
+                uri = "https://login.eveonline.com/launcher/token?accesstoken=" + accessToken;
+            }
+            else {
+                uri = "https://sisilogin.testeveonline.com/launcher/token?accesstoken=" + accessToken;
+            }
             HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(uri);
             req.Timeout = 5000;
             req.AllowAutoRedirect = false;
