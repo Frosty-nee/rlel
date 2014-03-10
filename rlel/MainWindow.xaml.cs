@@ -313,18 +313,36 @@ namespace rlel {
             }
         }
 
+        private bool checkFilePaths() {
+            string exefilePath = Path.Combine(Properties.Settings.Default.TranqPath, "bin", "ExeFile.exe");
+            if (!File.Exists(exefilePath)) {
+                this.showBalloon("eve path", "could not find " + exefilePath, System.Windows.Forms.ToolTipIcon.Error);
+                return false;
+            }
+            exefilePath = Path.Combine(Properties.Settings.Default.SisiPath, "bin", "ExeFile.exe");
+            if (!File.Exists(exefilePath)) {
+                this.showBalloon("eve path", "could not find " + exefilePath, System.Windows.Forms.ToolTipIcon.Error);
+                return false;
+            }
+            return true;
+        }
+
         private void patch(int install) {
 
             if (install == 1) {
                 System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\repair.exe", "-c");
                 repair.WorkingDirectory = Properties.Settings.Default.TranqPath;
                 System.Diagnostics.Process.Start(repair);
+
             }
             if (install == 2) {
+
                 System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\repair.exe","--server=singularity -c");
                 repair.WorkingDirectory = Properties.Settings.Default.SisiPath;
                 System.Diagnostics.Process.Start(repair);
+
             }
+
 
        }
 

@@ -113,13 +113,10 @@ namespace rlel {
 
         private string getSSOToken(string username, string password) {
             string accessToken = this.getAccessToken(username, password);
-            string uri;
+            string uri = "https://login.eveonline.com/launcher/token?accesstoken=" + accessToken;
             if (accessToken == null)
                 return null;
-            if (this.main.singularity.IsChecked == false) {
-                uri = "https://login.eveonline.com/launcher/token?accesstoken=" + accessToken;
-            }
-            else {
+            if (this.main.singularity.IsChecked == true) {
                 uri = "https://sisilogin.testeveonline.com/launcher/token?accesstoken=" + accessToken;
             }
             HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(uri);
