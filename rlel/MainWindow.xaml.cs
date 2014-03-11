@@ -290,41 +290,46 @@ namespace rlel {
 
         private void checkClientVersion() {
             this.updateEveVersion();
-            StreamReader sr = new StreamReader(String.Format("{0}\\{1}", Properties.Settings.Default.TranqPath, "start.ini"));
-            List<string> lines = new List<string>();
-            while (!sr.EndOfStream) {
-                lines.Add(sr.ReadLine());
+            StreamReader sr;
+            List<string> lines;
+            int clientVers;
+            if (this.checkFilePaths(1)) {
+                sr = new StreamReader(String.Format("{0}\\{1}", Properties.Settings.Default.TranqPath, "start.ini"));
+                lines = new List<string>();
+                while (!sr.EndOfStream) {
+                    lines.Add(sr.ReadLine());
+                }
+                sr.Close();
+                clientVers = Convert.ToInt32(lines[2].Substring(8));
+                if (this.tranqVersion != clientVers) {
+                    this.patch(1);
+                }
             }
-            sr.Close();
-            int clientVers = Convert.ToInt32(lines[2].Substring(8));
-            if (this.tranqVersion != clientVers) {
-                this.patch(1);
-            }
-
-            sr = new StreamReader(String.Format("{0}\\{1}", Properties.Settings.Default.SisiPath, "start.ini"));
-            lines.Clear();
-            while (!sr.EndOfStream) {
-                lines.Add(sr.ReadLine());
-            }
-            sr.Close();
-            clientVers = Convert.ToInt32(lines[2].Substring(8));
-            if (this.sisiVersion != clientVers) {
-                this.patch(2);
+            if (this.checkFilePaths(2)) {
+                sr = new StreamReader(String.Format("{0}\\{1}", Properties.Settings.Default.SisiPath, "start.ini"));
+                lines = new List<string>();
+                while (!sr.EndOfStream) {
+                    lines.Add(sr.ReadLine());
+                }
+                sr.Close();
+                clientVers = Convert.ToInt32(lines[2].Substring(8));
+                if (this.sisiVersion != clientVers && this.checkFilePaths(2)) {
+                    this.patch(2);
+                }
             }
         }
 
-        private bool checkFilePaths() {
-            string exefilePath = Path.Combine(Properties.Settings.Default.TranqPath, "bin", "ExeFile.exe");
-            if (!File.Exists(exefilePath)) {
-                this.showBalloon("eve path", "could not find " + exefilePath, System.Windows.Forms.ToolTipIcon.Error);
-                return false;
+        private bool checkFilePaths(int install) {
+            string exeFilePath;
+            if (install == 1) {
+                exeFilePath = Path.Combine(Properties.Settings.Default.TranqPath, "bin", "ExeFile.exe");
+                return File.Exists(exeFilePath);
             }
-            exefilePath = Path.Combine(Properties.Settings.Default.SisiPath, "bin", "ExeFile.exe");
-            if (!File.Exists(exefilePath)) {
-                this.showBalloon("eve path", "could not find " + exefilePath, System.Windows.Forms.ToolTipIcon.Error);
-                return false;
+            if (install == 2) {
+                exeFilePath = Path.Combine(Properties.Settings.Default.SisiPath, "bin", "ExeFile.exe");
+                return File.Exists(exeFilePath);
             }
-            return true;
+            return false;
         }
 
         private void patch(int install) {
