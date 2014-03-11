@@ -13,8 +13,10 @@ namespace rlel {
     /// </summary>
     public partial class Account : UserControl {
         private MainWindow main;
-        string accessToken;
-        DateTime accessTokenExpiration;
+        string tranqToken;
+        string sisiToken;
+        DateTime tranqTokenExpiration;
+        DateTime sisiTokenExpiration;
 
         public Account(MainWindow main) {
             InitializeComponent();
@@ -31,6 +33,12 @@ namespace rlel {
         }
 
         public bool launchAccount() {
+            string accessToken = this.tranqToken;
+            DateTime expire = this.tranqTokenExpiration;
+            if (this.main.singularity.IsChecked == true) {
+                accessToken = this.sisiToken;
+                expire = this.sisiTokenExpiration;
+            }
             string exefilePath = Path.Combine(this.main.evePath.Text, "bin", "ExeFile.exe");
             if (!File.Exists(exefilePath)) {
                 this.main.showBalloon("eve path", "could not find " + exefilePath, System.Windows.Forms.ToolTipIcon.Error);
@@ -46,7 +54,7 @@ namespace rlel {
                 ssoToken = this.getSSOToken(this.username.Text, this.password.Password);
             }
             catch (WebException e) {
-                this.accessToken = null;
+                accessToken = null;
                 this.main.showBalloon("logging in", e.Message, System.Windows.Forms.ToolTipIcon.Error);
                 return false;
             }
@@ -76,9 +84,11 @@ namespace rlel {
             return true;
         }
 
-        private string getAccessToken(string username, string password) {
-            if (this.accessToken != null && DateTime.UtcNow < this.accessTokenExpiration)
-                return this.accessToken;
+        private string getAccessToken(string username, string password ) {
+            if (this.main.singularity.IsChecked == false && tranqToken != null && DateTime.UtcNow < this.tranqTokenExpiration)
+                return this.tranqToken;
+            if (this.main.singularity.IsChecked == true && sisiToken != null && DateTime.UtcNow < this.sisiTokenExpiration)
+                return this.sisiToken;
             string uri = "https://login.eveonline.com/Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Flogin.eveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken";
             if (this.main.singularity.IsChecked == true) {
                 uri = "https://sisilogin.testeveonline.com//Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Fsisilogin.testeveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken";
@@ -106,8 +116,15 @@ namespace rlel {
             // https://login.eveonline.com/launcher?client_id=eveLauncherTQ#access_token=...&token_type=Bearer&expires_in=43200
             string accessToken = this.extractAccessToken(resp.ResponseUri.Fragment);
             resp.Close(); // WTF.NET http://stackoverflow.com/questions/11712232/ and http://stackoverflow.com/questions/1500955/
-            this.accessToken = accessToken;
-            this.accessTokenExpiration = DateTime.UtcNow + TimeSpan.FromHours(11); // expiry is 12 hours; we use 11 to be safe
+            if (this.main.singularity.IsChecked == false) {
+                this.tranqToken = accessToken;
+                this.tranqTokenExpiration = DateTime.UtcNow + TimeSpan.FromHours(11);
+            }
+            else {
+                this.sisiToken = accessToken;
+                this.sisiTokenExpiration = DateTime.UtcNow + TimeSpan.FromHours(11);
+            }
+
             return accessToken;
         }
 
