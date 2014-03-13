@@ -5,11 +5,14 @@
     <Grid>
         <CheckBox Name="autoUpdate" Content="Patch EVE automatically" Click="autoUpdate_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="12,41,0,0" />
         <TextBox Name="evePath" Height="23" Width="220" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="12,12,0,0" TextChanged="evePath_TextChanged" />
-        <CheckBox Name="singularity" Content="Singularity" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,15,92,0" Click="singularity_Click"/>
-        <Button Content="Browse" Name="browse" Click="browse_Click" HorizontalAlignment="Right" VerticalAlignment="Top" Height="23" Width="70" Margin="0,12,12,0" />
-        <ScrollViewer Name="accountViewer" VerticalAlignment="Top" Height="235" Margin="0,67,0,0">
-            <StackPanel Name="accountsPanel" Margin="0" />
-        </ScrollViewer>
-        <Button Name="addAccount" Content="add Account" Click="addAccount_Click" Height="23" Width="90" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="12,0,0,12" />
+        <CheckBox Name="singularity" Content="Singularity" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,15,92,0" Click="singularity_Click" Grid.ColumnSpan="2" />
+        <Button Name="save" Content="Save" HorizontalAlignment="Left" VerticalAlignment="Top" Click="save_Click" Height="23" Width="90"  Margin="301,126,0,0" />
+        <Button Content="Browse" Name="browse" Click="browse_Click" HorizontalAlignment="Right" VerticalAlignment="Top" Height="23" Width="70" Margin="0,12,12,0" Grid.Column="1" />
+        <Button Name="launch" Content="Launch" Click="launch_Click"  HorizontalAlignment="Left" VerticalAlignment="Top" Height="23" Width="90" Margin="301,97,0,0" />
+        <TextBox Name="user" Height="23" Width="135" HorizontalAlignment="Left" VerticalAlignment="top" Margin="12,68,0,0" />
+        <PasswordBox Name="pass" Height="23" Width="139" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="153,68,0,0" />
+        <ListBox Name="accountsPanel" Margin="12,97,108,12" SelectionMode="Single" HorizontalAlignment="Left" Width="280" SelectionChanged="accountsPanel_SelectionChanged"/>
+        <Button Name="addAccount" Content="Add Account" Click="addAccount_Click" Height="23" Width="90" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="301,155,0,0" />
+        <Button Name="remove" Content="Remove" Click="remove_Click" Height="23" Width="90" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="301,184,0,0" />
     </Grid>
 </Window>

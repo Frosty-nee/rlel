@@ -3,11 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" Height="36" Width="405">
+             mc:Ignorable="d" Height="20" Width="250">
     <Grid>
-        <Button Name="remove" Content="X" Click="remove_Click" Width="22" Height="22" HorizontalAlignment="Left" Margin="0,6,0,8" />
-        <Button Name="launch" Content="Launch" Click="launch_Click" Height="23" Width="75" HorizontalAlignment="Right" Margin="0,5,12,6" />
-        <TextBox Name="username" HorizontalAlignment="Left" VerticalAlignment="Top" Height="23" Width="140" Margin="26,6,0,0" TextChanged="credentialsChanged"  />
-        <PasswordBox Name="password" HorizontalAlignment="Left" VerticalAlignment="Top" Height="23" Width="140" Margin="172,6,0,0" PasswordChanged="credentialsChanged" />
+        <TextBlock Name="username" Text="Username" Width="250" VerticalAlignment="Center" Height="18" />
+        <PasswordBox Name="password" Password="Password" Visibility="Hidden" Margin="138,-1,162,1" />
     </Grid>
 </UserControl>

@@ -18,13 +18,15 @@ namespace rlel {
         DateTime tranqTokenExpiration;
         DateTime sisiTokenExpiration;
 
+
         public Account(MainWindow main) {
             InitializeComponent();
             this.main = main;
+
         }
 
         private void remove_Click(object sender, RoutedEventArgs e) {
-            this.main.accountsPanel.Children.Remove(this);
+            this.main.accountsPanel.Items.Remove(this);
             this.main.updateCredentials();
         }
 
@@ -153,10 +155,6 @@ namespace rlel {
             start += search.Length;
             string accessToken = urlFragment.Substring(start, urlFragment.IndexOf('&') - start);
             return accessToken;
-        }
-
-        private void credentialsChanged(object sender, EventArgs e) {
-            this.main.updateCredentials();
         }
     }
 }

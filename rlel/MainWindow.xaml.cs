@@ -48,7 +48,9 @@ namespace rlel {
         }
 
         private void addAccount_Click(object sender, RoutedEventArgs e) {
-            this.accountsPanel.Children.Add(new Account(this));
+            Account acc = new Account(this);
+            this.accountsPanel.Items.Add(acc);
+            this.accountsPanel.SelectedItem = acc;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -78,26 +80,6 @@ namespace rlel {
                 this.popAccounts();
             }
             this.tray.ContextMenu.MenuItems.Add("-");
-            // don't support groups yet
-            /* if (Properties.Settings.Default.groups != null) {
-                foreach (string gp in Properties.Settings.Default.groups) {
-                    Group G = new Group(this);
-                    string[] split = gp.Split(new char[] { ':' });
-                    foreach (string s in split) {
-                        if (s == split[0]) {
-                            G.groupName.Text = s;
-                        }
-                        else {
-                            foreach (Account account in this.accountsPanel.Children) {
-                                if (s == account.username.Text) {
-                                    G.addAccount(account);
-                                }
-                            }
-                        }
-                    }
-                    this.groupsPanel.Children.Add(G);
-                } 
-            } */
             this.popContextMenu();
             this.tray.Visible = true;
             this.saveAccounts = true;
@@ -113,10 +95,6 @@ namespace rlel {
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
             this.tray.Visible = false;
-        }
-
-        private void settings_Click(object sender, RoutedEventArgs e) {
-
         }
 
         private string getTranqPath() {
@@ -171,7 +149,8 @@ namespace rlel {
                 string[] split = credentials.Split(new char[] { ':' }, 4);
                 account.username.Text = split[0];
                 account.password.Password = this.decryptPass(rjm, split[1]);
-                this.accountsPanel.Children.Add(account);
+                this.accountsPanel.Items.Add(account);
+                this.accountsPanel.SelectedItem = this.accountsPanel.Items[0];
             }
         }
 
@@ -229,18 +208,12 @@ namespace rlel {
                 ((System.Windows.Forms.MenuItem)sender).Checked = Convert.ToBoolean(this.singularity.IsChecked);
             }
             else {
-                foreach (Account account in this.accountsPanel.Children) {
+                foreach (Account account in this.accountsPanel.Items) {
                     if (account.username.Text == username) {
                         account.launchAccount();
                         break;
                     }
-                } /*
-                foreach (Group group in this.groupsPanel.Children) {
-                    if (group.groupName.Text == username) {
-                        group.launchGroup();
-                        break;
-                    }
-                }*/
+                }
             }
         }
 
@@ -248,13 +221,10 @@ namespace rlel {
             while (this.tray.ContextMenu.MenuItems.Count > 2) {
                 this.tray.ContextMenu.MenuItems.RemoveAt(this.tray.ContextMenu.MenuItems.Count - 1);
             }
-            foreach (Account account in this.accountsPanel.Children) {
+            foreach (Account account in this.accountsPanel.Items) {
                 this.tray.ContextMenu.MenuItems.Add(account.username.Text, this.contextMenuClick);
             }
-            /*this.tray.ContextMenu.MenuItems.Add("-");
-            foreach (Group group in this.groupsPanel.Children) {
-                this.tray.ContextMenu.MenuItems.Add(group.groupname.Text, this.contextMenu_Click);
-            } */
+
         }
 
         public void showBalloon(string title, string text, System.Windows.Forms.ToolTipIcon icon) {
@@ -264,8 +234,9 @@ namespace rlel {
         public void updateCredentials() {
             if (!this.saveAccounts) // don't save accounts when we're still loading them into textboxes
                 return;
+            
             StringCollection accounts = new StringCollection();
-            foreach (Account account in this.accountsPanel.Children) {
+            foreach (Account account in this.accountsPanel.Items) {
                 string credentials = String.Format("{0}:{1}", account.username.Text, this.encryptPass(this.rjm, account.password.Password));
                 accounts.Add(credentials);
             }
@@ -361,6 +332,31 @@ namespace rlel {
             }
             Properties.Settings.Default.autoPatch = Convert.ToBoolean(autoUpdate.IsChecked);
             Properties.Settings.Default.Save();
+        }
+
+        private void save_Click(object sender, RoutedEventArgs e) {
+            ((Account)this.accountsPanel.SelectedItem).username.Text = this.user.Text;
+            ((Account)this.accountsPanel.SelectedItem).password.Password = this.pass.Password;
+            this.updateCredentials();
+            this.accountsPanel.Items.Refresh();
+        }
+
+        private void accountsPanel_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
+            if (this.accountsPanel.SelectedItem != null) {
+                if (((Account)this.accountsPanel.SelectedItem).username.Text != null)
+                    this.user.Text = ((Account)this.accountsPanel.SelectedItem).username.Text;
+                if (((Account)this.accountsPanel.SelectedItem).password.Password != null)
+                    this.pass.Password = ((Account)this.accountsPanel.SelectedItem).password.Password;
+            }
+        }
+
+        private void remove_Click(object sender, RoutedEventArgs e) {
+            this.accountsPanel.Items.Remove(this.accountsPanel.SelectedItem);
+            this.updateCredentials();
+        }
+
+        private void launch_Click(object sender, RoutedEventArgs e) {
+            ((Account)this.accountsPanel.SelectedItem).launchAccount();
         }
 
     }
