@@ -101,7 +101,7 @@ namespace rlel {
             this.popContextMenu();
             this.tray.Visible = true;
             this.saveAccounts = true;
-            this.checkUpdate = new Timer(36000000);
+            this.checkUpdate = new Timer(3600000);
             this.checkUpdate.Elapsed += new ElapsedEventHandler(checkUpdate_Elapsed);
             this.autoUpdate.IsChecked = Properties.Settings.Default.autoPatch;
         }
