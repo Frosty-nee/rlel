@@ -86,6 +86,10 @@ namespace rlel {
             this.checkUpdate = new Timer(3600000);
             this.checkUpdate.Elapsed += new ElapsedEventHandler(checkUpdate_Elapsed);
             this.autoUpdate.IsChecked = Properties.Settings.Default.autoPatch;
+            if (Properties.Settings.Default.autoPatch) {
+                this.checkClientVersion();
+                this.checkUpdate.Enabled = true;
+            }
         }
 
         void checkUpdate_Elapsed(object sender, ElapsedEventArgs e) {
