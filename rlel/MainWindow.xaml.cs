@@ -355,8 +355,13 @@ namespace rlel {
         }
 
         private void remove_Click(object sender, RoutedEventArgs e) {
-            this.accountsPanel.Items.Remove(this.accountsPanel.SelectedItem);
-            this.updateCredentials();
+            if (this.accountsPanel.SelectedItem != null) {
+                this.accountsPanel.Items.Remove(this.accountsPanel.SelectedItem);
+                this.updateCredentials();
+                if (this.accountsPanel.Items.Count > 0) {
+                    this.accountsPanel.SelectedItem = this.accountsPanel.Items[0];
+                }
+            }
         }
 
         private void launch_Click(object sender, RoutedEventArgs e) {
