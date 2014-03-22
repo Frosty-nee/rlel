@@ -366,7 +366,7 @@ namespace rlel {
 
         private void launch_Click(object sender, RoutedEventArgs e) {
             foreach (Account acct in this.accountsPanel.SelectedItems)
-            ((Account)this.accountsPanel.SelectedItem).launchAccount();
+                acct.launchAccount();
         }
 
     }
