@@ -86,6 +86,7 @@ namespace rlel {
             this.checkUpdate = new Timer(3600000);
             this.checkUpdate.Elapsed += new ElapsedEventHandler(checkUpdate_Elapsed);
             this.autoUpdate.IsChecked = Properties.Settings.Default.autoPatch;
+            this.dx9.IsChecked = Properties.Settings.Default.dx9;
             if (Properties.Settings.Default.autoPatch) {
                 this.checkClientVersion();
                 this.checkUpdate.Enabled = true;
@@ -367,6 +368,11 @@ namespace rlel {
         private void launch_Click(object sender, RoutedEventArgs e) {
             foreach (Account acct in this.accountsPanel.SelectedItems)
                 acct.launchAccount();
+        }
+
+        private void dx9_Click(object sender, RoutedEventArgs e) {
+            Properties.Settings.Default.dx9 = (bool)this.dx9.IsChecked;
+            Properties.Settings.Default.Save();
         }
 
     }

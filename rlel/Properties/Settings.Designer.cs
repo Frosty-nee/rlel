@@ -93,5 +93,17 @@ namespace rlel.Properties {
                 this["autoPatch"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool dx9 {
+            get {
+                return ((bool)(this["dx9"]));
+            }
+            set {
+                this["dx9"] = value;
+            }
+        }
     }
 }

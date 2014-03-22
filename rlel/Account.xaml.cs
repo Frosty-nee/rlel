@@ -66,15 +66,18 @@ namespace rlel {
             }
             this.main.showBalloon("logging in", "launching", System.Windows.Forms.ToolTipIcon.None);
             string args;
+            string dx9 = "dx11";
+            if (this.main.dx9.IsChecked == true)
+                dx9 = "dx9";
             if (this.main.singularity.IsChecked == true) {
-                args = @"/noconsole /ssoToken={0} /triPlatform=dx11 /server:Singularity";
+                args = @"/noconsole /ssoToken={0} /triPlatform={1} /server:Singularity";
                 
             }
             else {
-                args = @"/noconsole /ssoToken={0} /triPlatform=dx11";
+                args = @"/noconsole /ssoToken={0} /triPlatform={1}";
             }
             System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo(
-                @".\bin\ExeFile.exe", String.Format(args, ssoToken)
+                @".\bin\ExeFile.exe", String.Format(args, ssoToken, dx9)
             );
             if (this.main.singularity.IsChecked == true) {
                 psi.WorkingDirectory = Properties.Settings.Default.SisiPath;
