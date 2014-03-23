@@ -51,6 +51,8 @@ namespace rlel {
             Account acc = new Account(this);
             this.accountsPanel.Items.Add(acc);
             this.accountsPanel.SelectedItem = acc;
+            this.user.Focus();
+            this.user.SelectAll();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {

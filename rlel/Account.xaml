@@ -6,6 +6,6 @@
              mc:Ignorable="d" Height="20" Width="250">
     <Grid>
         <TextBlock Name="username" Text="Username" Width="250" VerticalAlignment="Center" Height="18" />
-        <PasswordBox Name="password" Password="Password" Visibility="Hidden" Margin="138,-1,162,1" />
+        <PasswordBox Name="password" Password="" Visibility="Hidden" Margin="138,-1,162,1" />
     </Grid>
 </UserControl>
