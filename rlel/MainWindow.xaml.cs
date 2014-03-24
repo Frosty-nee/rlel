@@ -360,8 +360,14 @@ namespace rlel {
         }
 
         private void remove_Click(object sender, RoutedEventArgs e) {
-            if (this.accountsPanel.SelectedItem != null) {
-                this.accountsPanel.Items.Remove(this.accountsPanel.SelectedItem);
+            if (this.accountsPanel.SelectedItems != null) {
+                List<Account> accounts = new List<Account>();
+                foreach (Account acct in this.accountsPanel.SelectedItems) {
+                    accounts.Add(acct);
+                }
+                foreach (Account acct in accounts) {
+                    this.accountsPanel.Items.Remove(acct);
+                }
                 this.updateCredentials();
                 if (this.accountsPanel.Items.Count > 0) {
                     this.accountsPanel.SelectedItem = this.accountsPanel.Items[0];
