@@ -69,6 +69,8 @@ namespace rlel {
                     Properties.Settings.Default.Save();
                 }
             }
+
+            
             this.evePath.Text = Properties.Settings.Default.TranqPath;
             this.tray = new System.Windows.Forms.NotifyIcon();
             this.tray.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ResourceAssembly.Location);
@@ -377,5 +379,13 @@ namespace rlel {
             Properties.Settings.Default.Save();
         }
 
+        private void user_GotFocus(object sender, RoutedEventArgs e) {
+            if (user.Text != "") {
+                return;
+            }
+            else {
+                user.Text = "Username";
+            }
+        }
     }
 }
