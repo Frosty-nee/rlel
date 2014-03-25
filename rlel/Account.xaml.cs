@@ -71,7 +71,7 @@ namespace rlel {
                 dx9 = "dx9";
             if (this.main.singularity.IsChecked == true) {
                 args = @"/noconsole /ssoToken={0} /triPlatform={1} /server:Singularity";
-                
+
             }
             else {
                 args = @"/noconsole /ssoToken={0} /triPlatform={1}";
@@ -89,7 +89,7 @@ namespace rlel {
             return true;
         }
 
-        private string getAccessToken(string username, string password ) {
+        private string getAccessToken(string username, string password) {
             if (this.main.singularity.IsChecked == false && tranqToken != null && DateTime.UtcNow < this.tranqTokenExpiration)
                 return this.tranqToken;
             if (this.main.singularity.IsChecked == true && sisiToken != null && DateTime.UtcNow < this.sisiTokenExpiration)
@@ -97,7 +97,7 @@ namespace rlel {
             string uri = "https://login.eveonline.com/Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Flogin.eveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken";
             if (this.main.singularity.IsChecked == true) {
                 uri = "https://sisilogin.testeveonline.com//Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Fsisilogin.testeveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken";
-               }
+            }
 
             HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(uri);
             req.Timeout = 5000;

@@ -61,16 +61,16 @@ namespace rlel {
                 if (path != null && File.Exists(Path.Combine(path, "bin", "Exefile.exe"))) {
                     Properties.Settings.Default.TranqPath = path;
                     Properties.Settings.Default.Save();
-            }
-            if (Properties.Settings.Default.SisiPath.Length == 0)
-                path = this.getSisiPath();
+                }
+                if (Properties.Settings.Default.SisiPath.Length == 0)
+                    path = this.getSisiPath();
                 if (path != null && File.Exists(Path.Combine(path, "bin", "Exefile.exe"))) {
                     Properties.Settings.Default.TranqPath = path;
                     Properties.Settings.Default.Save();
                 }
             }
 
-            
+
             this.evePath.Text = Properties.Settings.Default.TranqPath;
             this.tray = new System.Windows.Forms.NotifyIcon();
             this.tray.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ResourceAssembly.Location);
@@ -243,7 +243,7 @@ namespace rlel {
         public void updateCredentials() {
             if (!this.saveAccounts) // don't save accounts when we're still loading them into textboxes
                 return;
-            
+
             StringCollection accounts = new StringCollection();
             foreach (Account account in this.accountsPanel.Items) {
                 string credentials = String.Format("{0}:{1}", account.username.Text, this.encryptPass(this.rjm, account.password.Password));
@@ -262,7 +262,7 @@ namespace rlel {
                 this.tranqVersion = Convert.ToInt32(ds.Substring(6, 6));
 
                 ds = wc.DownloadString(new Uri("http://client.eveonline.com/patches/premium_patchinfoSISI_inc.txt"));
-                this.sisiVersion = Convert.ToInt32(ds.Substring(6,6));
+                this.sisiVersion = Convert.ToInt32(ds.Substring(6, 6));
                 this.updateCheckExpire = (DateTime.UtcNow + TimeSpan.FromHours(1));
                 wc.Dispose();
             }
@@ -322,14 +322,14 @@ namespace rlel {
             }
             if (install == 2) {
 
-                System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\repair.exe","--server=singularity -c");
+                System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\repair.exe", "--server=singularity -c");
                 repair.WorkingDirectory = Properties.Settings.Default.SisiPath;
                 System.Diagnostics.Process.Start(repair);
 
             }
 
 
-       }
+        }
 
         private void autoUpdate_Click(object sender, RoutedEventArgs e) {
             if (autoUpdate.IsChecked == true) {
@@ -392,6 +392,10 @@ namespace rlel {
             else {
                 user.Text = "Username";
             }
+        }
+
+        private void accountsPanel_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
+            ((Account)this.accountsPanel.SelectedItem).launchAccount();
         }
     }
 }
