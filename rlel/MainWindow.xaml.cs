@@ -41,11 +41,9 @@ namespace rlel {
         }
 
         private void Window_StateChanged(object sender, EventArgs e) {
-            if ((bool)this.minimizeToTray.IsChecked) {
-                this.ShowInTaskbar = (this.WindowState != System.Windows.WindowState.Minimized);
-                if (this.WindowState == System.Windows.WindowState.Minimized) {
-                    this.Hide();
-                }
+            this.ShowInTaskbar = (this.WindowState != System.Windows.WindowState.Minimized);
+            if (this.WindowState == System.Windows.WindowState.Minimized) {
+                this.Hide();
             }
         }
 
@@ -387,11 +385,6 @@ namespace rlel {
 
         private void dx9_Click(object sender, RoutedEventArgs e) {
             Properties.Settings.Default.dx9 = (bool)this.dx9.IsChecked;
-            Properties.Settings.Default.Save();
-        }
-
-        private void minimizeToTray_Click(object sender, RoutedEventArgs e) {
-            Properties.Settings.Default.minimizeToTray = (bool)this.minimizeToTray.IsChecked;
             Properties.Settings.Default.Save();
         }
     }

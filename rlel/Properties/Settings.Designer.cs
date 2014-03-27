@@ -105,17 +105,5 @@ namespace rlel.Properties {
                 this["dx9"] = value;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool minimizeToTray {
-            get {
-                return ((bool)(this["minimizeToTray"]));
-            }
-            set {
-                this["minimizeToTray"] = value;
-            }
-        }
     }
 }

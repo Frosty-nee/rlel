@@ -7,7 +7,6 @@
         <TextBox Name="evePath" Height="23" Width="220" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="12,12,0,0" TextChanged="evePath_TextChanged" />
         <CheckBox Name="dx9" Content="DirectX 9" Click="dx9_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="242,41,0,0" />
         <CheckBox Name="singularity" Content="Singularity" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="242,15,0,0" Click="singularity_Click" />
-        <CheckBox Name="minimizeToTray" Content="Minimize to Tray" Click="minimizeToTray_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="313,213,-313,-213" />
         <Button Content="Browse" Name="browse" Click="browse_Click" HorizontalAlignment="left" VerticalAlignment="Top" Height="23" Width="70" Margin="333,11,0,0" />
         <TextBox Name="user" Height="23" Width="143" HorizontalAlignment="Left" VerticalAlignment="top" Margin="12,68,0,0" />
         <PasswordBox Name="pass" Height="23" Width="144" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="163,68,0,0" />
