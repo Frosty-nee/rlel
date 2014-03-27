@@ -8,7 +8,7 @@
         <CheckBox Name="dx9" Content="DirectX 9" Click="dx9_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="242,41,0,0" />
         <CheckBox Name="singularity" Content="Singularity" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="242,15,0,0" Click="singularity_Click" />
         <Button Content="Browse" Name="browse" Click="browse_Click" HorizontalAlignment="left" VerticalAlignment="Top" Height="23" Width="70" Margin="333,11,0,0" />
-        <TextBox Name="user" Height="23" Width="143" GotFocus="user_GotFocus" HorizontalAlignment="Left" VerticalAlignment="top" Margin="12,68,0,0" />
+        <TextBox Name="user" Height="23" Width="143" HorizontalAlignment="Left" VerticalAlignment="top" Margin="12,68,0,0" />
         <PasswordBox Name="pass" Height="23" Width="144" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="163,68,0,0" />
         <Button Name="save" Content="Save" HorizontalAlignment="Left" VerticalAlignment="Top" Click="save_Click" Height="23" Width="90"  Margin="313,97,0,0" />
         <Button Name="addAccount" Content="Add Account" Click="addAccount_Click" Height="23" Width="90" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="313,155,0,0" />

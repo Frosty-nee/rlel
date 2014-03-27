@@ -70,7 +70,6 @@ namespace rlel {
                 }
             }
 
-
             this.evePath.Text = Properties.Settings.Default.TranqPath;
             this.tray = new System.Windows.Forms.NotifyIcon();
             this.tray.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ResourceAssembly.Location);
@@ -313,22 +312,16 @@ namespace rlel {
         }
 
         private void patch(int install) {
-
             if (install == 1) {
                 System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\repair.exe", "-c");
                 repair.WorkingDirectory = Properties.Settings.Default.TranqPath;
                 System.Diagnostics.Process.Start(repair);
-
             }
             if (install == 2) {
-
                 System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\repair.exe", "--server=singularity -c");
                 repair.WorkingDirectory = Properties.Settings.Default.SisiPath;
                 System.Diagnostics.Process.Start(repair);
-
             }
-
-
         }
 
         private void autoUpdate_Click(object sender, RoutedEventArgs e) {
@@ -344,10 +337,20 @@ namespace rlel {
         }
 
         private void save_Click(object sender, RoutedEventArgs e) {
-            ((Account)this.accountsPanel.SelectedItem).username.Text = this.user.Text;
-            ((Account)this.accountsPanel.SelectedItem).password.Password = this.pass.Password;
-            this.updateCredentials();
-            this.accountsPanel.Items.Refresh();
+            if (this.accountsPanel.SelectedItem != null) {
+                ((Account)this.accountsPanel.SelectedItem).username.Text = this.user.Text;
+                ((Account)this.accountsPanel.SelectedItem).password.Password = this.pass.Password;
+                this.updateCredentials();
+                this.accountsPanel.Items.Refresh();
+            }
+            else {
+                Account acct = new Account(this);
+                acct.username.Text = this.user.Text;
+                acct.password.Password = this.pass.Password;
+                this.accountsPanel.Items.Add(acct);
+                this.updateCredentials();
+                this.accountsPanel.Items.Refresh();
+            }
         }
 
         private void accountsPanel_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
@@ -383,15 +386,6 @@ namespace rlel {
         private void dx9_Click(object sender, RoutedEventArgs e) {
             Properties.Settings.Default.dx9 = (bool)this.dx9.IsChecked;
             Properties.Settings.Default.Save();
-        }
-
-        private void user_GotFocus(object sender, RoutedEventArgs e) {
-            if (user.Text != "") {
-                return;
-            }
-            else {
-                user.Text = "Username";
-            }
         }
 
         private void accountsPanel_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
