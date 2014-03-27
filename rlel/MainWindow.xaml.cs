@@ -41,9 +41,11 @@ namespace rlel {
         }
 
         private void Window_StateChanged(object sender, EventArgs e) {
-            this.ShowInTaskbar = (this.WindowState != System.Windows.WindowState.Minimized);
-            if (this.WindowState == System.Windows.WindowState.Minimized) {
-                this.Hide();
+            if ((bool)this.minimizeToTray.IsChecked) {
+                this.ShowInTaskbar = (this.WindowState != System.Windows.WindowState.Minimized);
+                if (this.WindowState == System.Windows.WindowState.Minimized) {
+                    this.Hide();
+                }
             }
         }
 
@@ -213,7 +215,7 @@ namespace rlel {
             string username = ((System.Windows.Forms.MenuItem)sender).Text;
             if (username == "Singularity") {
                 this.singularity.IsChecked = !this.singularity.IsChecked;
-                ((System.Windows.Forms.MenuItem)sender).Checked = Convert.ToBoolean(this.singularity.IsChecked);
+                ((System.Windows.Forms.MenuItem)sender).Checked = (bool)this.singularity.IsChecked;
             }
             else {
                 foreach (Account account in this.accountsPanel.Items) {
@@ -332,7 +334,7 @@ namespace rlel {
             if (autoUpdate.IsChecked == false) {
                 this.checkUpdate.Enabled = false;
             }
-            Properties.Settings.Default.autoPatch = Convert.ToBoolean(autoUpdate.IsChecked);
+            Properties.Settings.Default.autoPatch = (bool)autoUpdate.IsChecked;
             Properties.Settings.Default.Save();
         }
 
@@ -388,8 +390,9 @@ namespace rlel {
             Properties.Settings.Default.Save();
         }
 
-        private void accountsPanel_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
-            ((Account)this.accountsPanel.SelectedItem).launchAccount();
+        private void minimizeToTray_Click(object sender, RoutedEventArgs e) {
+            Properties.Settings.Default.minimizeToTray = (bool)this.minimizeToTray.IsChecked;
+            Properties.Settings.Default.Save();
         }
     }
 }

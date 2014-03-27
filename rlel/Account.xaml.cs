@@ -159,5 +159,9 @@ namespace rlel {
             string accessToken = urlFragment.Substring(start, urlFragment.IndexOf('&') - start);
             return accessToken;
         }
+
+        private void UserControl_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
+            this.launchAccount();
+        }
     }
 }
