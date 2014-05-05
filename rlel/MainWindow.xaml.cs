@@ -77,6 +77,7 @@ namespace rlel {
             this.tray.ContextMenu = new System.Windows.Forms.ContextMenu();
             this.tray.MouseClick += new System.Windows.Forms.MouseEventHandler(this.tray_Click);
             this.contextMenuClick = new EventHandler(this.contextMenu_Click);
+            this.tray.ContextMenu.MenuItems.Add("Exit", this.contextMenu_Click);
             this.tray.ContextMenu.MenuItems.Add("Singularity", this.contextMenuClick);
             this.tray.ContextMenu.MenuItems.Add("-");
             if (Properties.Settings.Default.accounts != null) {
@@ -215,6 +216,9 @@ namespace rlel {
                 this.singularity.IsChecked = !this.singularity.IsChecked;
                 ((System.Windows.Forms.MenuItem)sender).Checked = (bool)this.singularity.IsChecked;
             }
+            if (username == "Exit") {
+                this.Close();
+            }
             else {
                 foreach (Account account in this.accountsPanel.Items) {
                     if (account.username.Text == username) {
@@ -226,7 +230,7 @@ namespace rlel {
         }
 
         private void popContextMenu() {
-            while (this.tray.ContextMenu.MenuItems.Count > 2) {
+            while (this.tray.ContextMenu.MenuItems.Count > 3) {
                 this.tray.ContextMenu.MenuItems.RemoveAt(this.tray.ContextMenu.MenuItems.Count - 1);
             }
             foreach (Account account in this.accountsPanel.Items) {
