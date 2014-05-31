@@ -9,6 +9,7 @@ using System.Collections.Specialized;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
+using System.Management;
 
 namespace rlel {
     /// <summary>
@@ -316,9 +317,10 @@ namespace rlel {
             }
             repair.WorkingDirectory = path;
             repair.WindowStyle = ProcessWindowStyle.Minimized;
-            Thread akill = new Thread(new ParameterizedThreadStart(MainWindow.kill));
-            akill.Start(this.findLatestLog(repair.WorkingDirectory));
-            System.Diagnostics.Process.Start(repair);
+            Process proc = System.Diagnostics.Process.Start(repair);
+            Thread akill = new Thread(() => MainWindow.kill(this.findLatestLog(repair.WorkingDirectory), proc));
+            akill.Start();
+
         }
 
         private string findLatestLog(string path) {
@@ -335,31 +337,44 @@ namespace rlel {
             return latestfile;
         }
 
-        public static void kill(object path) {
+        public static void kill(string path, Process PID) {
             using (FileStream fs = new FileStream
-                ((string)path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+                (path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
                 using (StreamReader sr = new StreamReader(fs)) {
                     sr.ReadToEnd();
                     while (true) {
                         while (!sr.EndOfStream) {
                             string s = sr.ReadLine();
                             if ( s.Contains("Client update: successful")) {
-                                Process[] test = Process.GetProcessesByName("launcher"); 
-                                foreach (Process p in test) {
-                                    if (p.MainWindowTitle.Contains("EVE Online Launcher")) {
-                                        p.Kill();
-                                        return;
-                                    }
-                                }
+                                foreach( Process p in getChildren(PID.Id)) {
+                                    p.CloseMainWindow();
 
+                                }
+                                return;
                             }
-                        }
                         while (sr.EndOfStream) {
                             Thread.Sleep(1000);
+                            }
                         }
                     }
                 }
             }
+        }
+
+        private static IEnumerable<Process> getChildren(int id) {
+            List<Process> children = new List<Process>();
+            List<Process> grandchildren = new List<Process>();
+            ManagementObjectSearcher search = new ManagementObjectSearcher(String.Format("SELECT * FROM Win32_Process WHERE ParentProcessID={0}", id));
+            foreach (ManagementObject mo in search.Get()) {
+                Console.WriteLine(mo);
+                Console.WriteLine(Process.GetProcessById(Convert.ToInt32(mo["ProcessID"])));
+                children.Add(Process.GetProcessById(Convert.ToInt32(mo["ProcessID"])));
+            }
+            foreach (Process child in children) {
+                grandchildren.AddRange(getChildren(child.Id));
+            }
+            children.AddRange(grandchildren);
+            return children;
         }
 
         private void autoUpdate_Click(object sender, RoutedEventArgs e) {
