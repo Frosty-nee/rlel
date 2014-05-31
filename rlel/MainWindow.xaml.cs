@@ -8,6 +8,7 @@ using System.Windows;
 using System.Collections.Specialized;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 
 namespace rlel {
     /// <summary>
@@ -20,7 +21,7 @@ namespace rlel {
         int sisiVersion;
         EventHandler contextMenuClick;
         DateTime updateCheckExpire = new DateTime();
-        Timer checkUpdate;
+        System.Timers.Timer checkUpdate;
         RijndaelManaged rjm = new RijndaelManaged();
 
         public MainWindow() {
@@ -65,7 +66,7 @@ namespace rlel {
                 if (Properties.Settings.Default.SisiPath.Length == 0)
                     path = this.getSisiPath();
                 if (path != null && File.Exists(Path.Combine(path, "bin", "Exefile.exe"))) {
-                    Properties.Settings.Default.TranqPath = path;
+                    Properties.Settings.Default.SisiPath = path;
                     Properties.Settings.Default.Save();
                 }
             }
@@ -87,7 +88,7 @@ namespace rlel {
             this.popContextMenu();
             this.tray.Visible = true;
             this.saveAccounts = true;
-            this.checkUpdate = new Timer(3600000);
+            this.checkUpdate = new System.Timers.Timer(3600000); //this is 1 hour, I think
             this.checkUpdate.Elapsed += new ElapsedEventHandler(checkUpdate_Elapsed);
             this.autoUpdate.IsChecked = Properties.Settings.Default.autoPatch;
             this.dx9.IsChecked = Properties.Settings.Default.dx9;
@@ -317,14 +318,60 @@ namespace rlel {
 
         private void patch(int install) {
             if (install == 1) {
-                System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\repair.exe", "-c");
+                System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\eve.exe", "");
                 repair.WorkingDirectory = Properties.Settings.Default.TranqPath;
                 System.Diagnostics.Process.Start(repair);
+                Thread akill = new Thread(new ParameterizedThreadStart(MainWindow.kill));
+                akill.Start(this.findLatestLog(repair.WorkingDirectory));
+
             }
             if (install == 2) {
-                System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\repair.exe", "--server=singularity -c");
+                System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\eve.exe", "/server:singularity");
                 repair.WorkingDirectory = Properties.Settings.Default.SisiPath;
                 System.Diagnostics.Process.Start(repair);
+                Thread akill = new Thread(new ParameterizedThreadStart(MainWindow.kill));
+                akill.Start(this.findLatestLog(repair.WorkingDirectory));
+            }
+        }
+
+        private string findLatestLog(string path) {
+            string latestfile = "";
+            DateTime write = new DateTime() ;
+            foreach (string file in Directory.EnumerateFiles(Path.Combine(path, "launcher", "cache"))) {
+                if (file.Contains("launcher")) {
+                    if (File.GetLastWriteTime(file) > write) {
+                        latestfile = file;
+                        write = File.GetLastAccessTime(file);
+                    }
+                }
+            }
+            return latestfile;
+        }
+
+        public static void kill(object path) {
+            using (FileStream fs = new FileStream
+                ((string)path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+                using (StreamReader sr = new StreamReader(fs)) {
+                    sr.ReadToEnd();
+                    while (true) {
+                        while (!sr.EndOfStream) {
+                            string s = sr.ReadLine();
+                            if ( s.Contains("Client update: successful")) {
+                                Process[] test = Process.GetProcessesByName("launcher"); 
+                                foreach (Process p in test) {
+                                    if (p.MainWindowTitle.Contains("EVE Online Launcher")) {
+                                        p.Kill();
+                                        return;
+                                    }
+                                }
+
+                            }
+                        }
+                        while (sr.EndOfStream) {
+                            Thread.Sleep(1000);
+                        }
+                    }
+                }
             }
         }
 
@@ -383,8 +430,9 @@ namespace rlel {
         }
 
         private void launch_Click(object sender, RoutedEventArgs e) {
-            foreach (Account acct in this.accountsPanel.SelectedItems)
+            foreach (Account acct in this.accountsPanel.SelectedItems) {
                 acct.launchAccount();
+            }
         }
 
         private void dx9_Click(object sender, RoutedEventArgs e) {
