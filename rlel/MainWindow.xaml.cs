@@ -17,7 +17,6 @@ namespace rlel {
     /// </summary>
     public partial class MainWindow : Window {
         System.Windows.Forms.NotifyIcon tray;
-        bool saveAccounts = false;
         int tranqVersion;
         int sisiVersion;
         EventHandler contextMenuClick;
@@ -88,7 +87,6 @@ namespace rlel {
             this.tray.ContextMenu.MenuItems.Add("-");
             this.popContextMenu();
             this.tray.Visible = true;
-            this.saveAccounts = true;
             this.checkUpdate = new System.Timers.Timer(3600000); //this is 1 hour, I think
             this.checkUpdate.Elapsed += new ElapsedEventHandler(checkUpdate_Elapsed);
             this.autoUpdate.IsChecked = Properties.Settings.Default.autoPatch;
@@ -246,9 +244,6 @@ namespace rlel {
         }
 
         public void updateCredentials() {
-            if (!this.saveAccounts) // don't save accounts when we're still loading them into textboxes
-                return;
-
             StringCollection accounts = new StringCollection();
             foreach (Account account in this.accountsPanel.Items) {
                 string credentials = String.Format("{0}:{1}", account.username.Text, this.encryptPass(this.rjm, account.password.Password));
@@ -287,7 +282,7 @@ namespace rlel {
                 sr.Close();
                 clientVers = Convert.ToInt32(lines[2].Substring(8));
                 if (this.tranqVersion != clientVers) {
-                    this.patch(Properties.Settings.Default.TranqPath);
+                    this.patch(Properties.Settings.Default.TranqPath, false);
                 }
             }
             if (this.checkFilePaths(Properties.Settings.Default.SisiPath)) {
@@ -299,7 +294,7 @@ namespace rlel {
                 sr.Close();
                 clientVers = Convert.ToInt32(lines[2].Substring(8));
                 if (this.sisiVersion != clientVers) {
-                    this.patch(Properties.Settings.Default.SisiPath);
+                    this.patch(Properties.Settings.Default.SisiPath, true);
                 }
             }
         }
@@ -310,9 +305,9 @@ namespace rlel {
             return File.Exists(exeFilePath);
         }
 
-        private void patch(string path) {
+        private void patch(string path, bool sisi) {
             System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\eve.exe", "");
-            if ((bool)this.singularity.IsChecked) {
+            if (sisi) {
                 repair = new System.Diagnostics.ProcessStartInfo(@".\eve.exe", "/server:singularity");
             }
             repair.WorkingDirectory = path;
