@@ -366,8 +366,6 @@ namespace rlel {
             List<Process> grandchildren = new List<Process>();
             ManagementObjectSearcher search = new ManagementObjectSearcher(String.Format("SELECT * FROM Win32_Process WHERE ParentProcessID={0}", id));
             foreach (ManagementObject mo in search.Get()) {
-                Console.WriteLine(mo);
-                Console.WriteLine(Process.GetProcessById(Convert.ToInt32(mo["ProcessID"])));
                 children.Add(Process.GetProcessById(Convert.ToInt32(mo["ProcessID"])));
             }
             foreach (Process child in children) {
