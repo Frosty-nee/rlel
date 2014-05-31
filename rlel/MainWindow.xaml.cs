@@ -277,7 +277,7 @@ namespace rlel {
             StreamReader sr;
             List<string> lines;
             int clientVers;
-            if (this.checkFilePaths(1)) {
+            if (this.checkFilePaths(Properties.Settings.Default.TranqPath)) {
                 sr = new StreamReader(String.Format("{0}\\{1}", Properties.Settings.Default.TranqPath, "start.ini"));
                 lines = new List<string>();
                 while (!sr.EndOfStream) {
@@ -286,10 +286,10 @@ namespace rlel {
                 sr.Close();
                 clientVers = Convert.ToInt32(lines[2].Substring(8));
                 if (this.tranqVersion != clientVers) {
-                    this.patch(1);
+                    this.patch(Properties.Settings.Default.TranqPath);
                 }
             }
-            if (this.checkFilePaths(2)) {
+            if (this.checkFilePaths(Properties.Settings.Default.SisiPath)) {
                 sr = new StreamReader(String.Format("{0}\\{1}", Properties.Settings.Default.SisiPath, "start.ini"));
                 lines = new List<string>();
                 while (!sr.EndOfStream) {
@@ -297,48 +297,35 @@ namespace rlel {
                 }
                 sr.Close();
                 clientVers = Convert.ToInt32(lines[2].Substring(8));
-                if (this.sisiVersion != clientVers && this.checkFilePaths(2)) {
-                    this.patch(2);
+                if (this.sisiVersion != clientVers) {
+                    this.patch(Properties.Settings.Default.SisiPath);
                 }
             }
         }
 
-        private bool checkFilePaths(int install) {
+        private bool checkFilePaths(string path) {
             string exeFilePath;
-            if (install == 1) {
-                exeFilePath = Path.Combine(Properties.Settings.Default.TranqPath, "bin", "ExeFile.exe");
-                return File.Exists(exeFilePath);
-            }
-            if (install == 2) {
-                exeFilePath = Path.Combine(Properties.Settings.Default.SisiPath, "bin", "ExeFile.exe");
-                return File.Exists(exeFilePath);
-            }
-            return false;
+            exeFilePath = Path.Combine(path, "bin", "ExeFile.exe");
+            return File.Exists(exeFilePath);
         }
 
-        private void patch(int install) {
-            if (install == 1) {
-                System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\eve.exe", "");
-                repair.WorkingDirectory = Properties.Settings.Default.TranqPath;
-                System.Diagnostics.Process.Start(repair);
-                Thread akill = new Thread(new ParameterizedThreadStart(MainWindow.kill));
-                akill.Start(this.findLatestLog(repair.WorkingDirectory));
-
+        private void patch(string path) {
+            System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\eve.exe", "");
+            if ((bool)this.singularity.IsChecked) {
+                repair = new System.Diagnostics.ProcessStartInfo(@".\eve.exe", "/server:singularity");
             }
-            if (install == 2) {
-                System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\eve.exe", "/server:singularity");
-                repair.WorkingDirectory = Properties.Settings.Default.SisiPath;
-                System.Diagnostics.Process.Start(repair);
-                Thread akill = new Thread(new ParameterizedThreadStart(MainWindow.kill));
-                akill.Start(this.findLatestLog(repair.WorkingDirectory));
-            }
+            repair.WorkingDirectory = path;
+            repair.WindowStyle = ProcessWindowStyle.Minimized;
+            Thread akill = new Thread(new ParameterizedThreadStart(MainWindow.kill));
+            akill.Start(this.findLatestLog(repair.WorkingDirectory));
+            System.Diagnostics.Process.Start(repair);
         }
 
         private string findLatestLog(string path) {
             string latestfile = "";
             DateTime write = new DateTime() ;
             foreach (string file in Directory.EnumerateFiles(Path.Combine(path, "launcher", "cache"))) {
-                if (file.Contains("launcher")) {
+                if (file.Contains("launcher.")) {
                     if (File.GetLastWriteTime(file) > write) {
                         latestfile = file;
                         write = File.GetLastAccessTime(file);
