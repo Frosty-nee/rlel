@@ -23,6 +23,8 @@ namespace rlel {
         DateTime updateCheckExpire = new DateTime();
         System.Timers.Timer checkUpdate;
         RijndaelManaged rjm = new RijndaelManaged();
+        bool tqpatching;
+        bool sisipatching;
 
         public MainWindow() {
             InitializeComponent();
@@ -275,27 +277,23 @@ namespace rlel {
             int clientVers;
             if (this.checkFilePaths(Properties.Settings.Default.TranqPath)) {
                 sr = new StreamReader(String.Format("{0}\\{1}", Properties.Settings.Default.TranqPath, "start.ini"));
-                lines = new List<string>();
-                while (!sr.EndOfStream) {
-                    lines.Add(sr.ReadLine());
-                }
-                sr.Close();
-                clientVers = Convert.ToInt32(lines[2].Substring(8));
+                sr.ReadLine(); sr.ReadLine();
+
+                clientVers = Convert.ToInt32(sr.ReadLine().Substring(8));
                 if (this.tranqVersion != clientVers) {
                     this.patch(Properties.Settings.Default.TranqPath, false);
                 }
+                sr.Close();
             }
             if (this.checkFilePaths(Properties.Settings.Default.SisiPath)) {
                 sr = new StreamReader(String.Format("{0}\\{1}", Properties.Settings.Default.SisiPath, "start.ini"));
-                lines = new List<string>();
-                while (!sr.EndOfStream) {
-                    lines.Add(sr.ReadLine());
-                }
-                sr.Close();
-                clientVers = Convert.ToInt32(lines[2].Substring(8));
+                sr.ReadLine(); sr.ReadLine();
+                
+                clientVers = Convert.ToInt32(sr.ReadLine().Substring(8));
                 if (this.sisiVersion != clientVers) {
                     this.patch(Properties.Settings.Default.SisiPath, true);
                 }
+                sr.Close();
             }
         }
 
@@ -306,6 +304,15 @@ namespace rlel {
         }
 
         private void patch(string path, bool sisi) {
+            if (tqpatching && !sisi)
+                return;
+            if (sisipatching && sisi)
+                return;
+            if (!sisi)
+                tqpatching = true;
+            else
+                sisipatching = true;
+
             System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\eve.exe", "");
             if (sisi) {
                 repair = new System.Diagnostics.ProcessStartInfo(@".\eve.exe", "/server:singularity");
@@ -339,17 +346,14 @@ namespace rlel {
                     sr.ReadToEnd();
                     while (true) {
                         while (!sr.EndOfStream) {
-                            string s = sr.ReadLine();
-                            if ( s.Contains("Client update: successful")) {
-                                foreach( Process p in getChildren(PID.Id)) {
-                                    p.CloseMainWindow();
-
+                            string s = sr.ReadToEnd();
+                            if (s.Contains("Client update: successful")) {
+                                foreach (Process p in getChildren(PID.Id)) {
+                                    p.CloseMainWindow();                                
                                 }
                                 return;
                             }
-                        while (sr.EndOfStream) {
                             Thread.Sleep(1000);
-                            }
                         }
                     }
                 }
