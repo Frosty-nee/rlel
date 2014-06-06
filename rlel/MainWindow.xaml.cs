@@ -23,8 +23,8 @@ namespace rlel {
         DateTime updateCheckExpire = new DateTime();
         System.Timers.Timer checkUpdate;
         RijndaelManaged rjm = new RijndaelManaged();
-        bool tqpatching;
-        bool sisipatching;
+        Thread tqpatching;
+        Thread sisipatching;
 
         public MainWindow() {
             InitializeComponent();
@@ -273,7 +273,6 @@ namespace rlel {
         private void checkClientVersion() {
             this.updateEveVersion();
             StreamReader sr;
-            List<string> lines;
             int clientVers;
             if (this.checkFilePaths(Properties.Settings.Default.TranqPath)) {
                 sr = new StreamReader(String.Format("{0}\\{1}", Properties.Settings.Default.TranqPath, "start.ini"));
@@ -304,24 +303,24 @@ namespace rlel {
         }
 
         private void patch(string path, bool sisi) {
-            if (tqpatching && !sisi)
+            if (!sisi && tqpatching!= null && tqpatching.IsAlive)
                 return;
-            if (sisipatching && sisi)
+            if (sisi && sisipatching != null && sisipatching.IsAlive)
                 return;
-            if (!sisi)
-                tqpatching = true;
-            else
-                sisipatching = true;
 
             System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\eve.exe", "");
-            if (sisi) {
+            if (sisi) 
                 repair = new System.Diagnostics.ProcessStartInfo(@".\eve.exe", "/server:singularity");
-            }
             repair.WorkingDirectory = path;
             repair.WindowStyle = ProcessWindowStyle.Minimized;
             Process proc = System.Diagnostics.Process.Start(repair);
             Thread akill = new Thread(() => MainWindow.kill(this.findLatestLog(repair.WorkingDirectory), proc));
             akill.Start();
+
+            if (!sisi)
+                tqpatching = akill;
+            else
+                sisipatching = akill;
 
         }
 
@@ -345,16 +344,14 @@ namespace rlel {
                 using (StreamReader sr = new StreamReader(fs)) {
                     sr.ReadToEnd();
                     while (true) {
-                        while (!sr.EndOfStream) {
                             string s = sr.ReadToEnd();
                             if (s.Contains("Client update: successful")) {
                                 foreach (Process p in getChildren(PID.Id)) {
                                     p.CloseMainWindow();                                
                                 }
                                 return;
-                            }
-                            Thread.Sleep(1000);
                         }
+                        Thread.Sleep(1000);
                     }
                 }
             }
