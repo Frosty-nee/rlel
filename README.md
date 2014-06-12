@@ -3,11 +3,13 @@
 rlel (yes I hate this acronym too) is a replacement for the CCP launcher that supports launching both 
 Tranquility and Singularity clients, as well as keeping those clients up to date automagically
 
+<br>![alt](http://i.imgur.com/uA0bCYQ.png)
+
 ## FAQ
 
 ### are there binaries?
 
-http://frosty-nee.net/r/rlel.exe
+http://frosty-nee.net/r/rlel.exe 
 
 ### are passwords encrypted?
 
@@ -15,7 +17,7 @@ yes
 
 ### do you steal my password
 
-only on tuesdays at 4:32AM UTC
+I resist the urge to collect them for science
 
 ### how does it work?
 
