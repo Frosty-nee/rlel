@@ -287,7 +287,6 @@ namespace rlel {
             if (this.checkFilePaths(Properties.Settings.Default.SisiPath)) {
                 sr = new StreamReader(String.Format("{0}\\{1}", Properties.Settings.Default.SisiPath, "start.ini"));
                 sr.ReadLine(); sr.ReadLine();
-                
                 clientVers = Convert.ToInt32(sr.ReadLine().Substring(8));
                 if (this.sisiVersion != clientVers) {
                     this.patch(Properties.Settings.Default.SisiPath, true);
@@ -303,18 +302,18 @@ namespace rlel {
         }
 
         private void patch(string path, bool sisi) {
-            if (!sisi && tqpatching!= null && tqpatching.IsAlive)
+            if (!sisi && tqpatching != null && tqpatching.IsAlive)
                 return;
             if (sisi && sisipatching != null && sisipatching.IsAlive)
                 return;
 
             System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\eve.exe", "");
-            if (sisi) 
+            if (sisi)
                 repair = new System.Diagnostics.ProcessStartInfo(@".\eve.exe", "/server:singularity");
             repair.WorkingDirectory = path;
             repair.WindowStyle = ProcessWindowStyle.Minimized;
             Process proc = System.Diagnostics.Process.Start(repair);
-            Thread akill = new Thread(() => MainWindow.kill(this.findLatestLog(repair.WorkingDirectory), proc));
+            Thread akill = new Thread(() => MainWindow.kill(Path.Combine(repair.WorkingDirectory, "launcher", "cache", String.Format("launcher.{0}.log", this.findLatestLog())), proc));
             akill.Start();
 
             if (!sisi)
@@ -324,32 +323,34 @@ namespace rlel {
 
         }
 
-        private string findLatestLog(string path) {
-            string latestfile = "";
-            DateTime write = new DateTime() ;
-            foreach (string file in Directory.EnumerateFiles(Path.Combine(path, "launcher", "cache"))) {
-                if (file.Contains("launcher.")) {
-                    if (File.GetLastWriteTime(file) > write) {
-                        latestfile = file;
-                        write = File.GetLastAccessTime(file);
-                    }
-                }
-            }
-            return latestfile;
+        private string findLatestLog() {
+            DateTime date = DateTime.UtcNow;
+            string month;
+            if (date.Month < 10)
+                month = "0" + Convert.ToInt32(date.Month);
+
+            else
+                month = Convert.ToString(date.Month);
+
+            return String.Format("{0}-{1}-{2}", date.Year, month, date.Day);
         }
 
         public static void kill(string path, Process PID) {
+            if (!File.Exists(path)) {
+                FileStream f = File.Create(path);
+                f.Close();
+            }
             using (FileStream fs = new FileStream
-                (path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+                 (path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
                 using (StreamReader sr = new StreamReader(fs)) {
                     sr.ReadToEnd();
                     while (true) {
-                            string s = sr.ReadToEnd();
-                            if (s.Contains("Client update: successful")) {
-                                foreach (Process p in getChildren(PID.Id)) {
-                                    p.CloseMainWindow();                                
-                                }
-                                return;
+                        string s = sr.ReadToEnd();
+                        if (s.Contains("Client update: successful")) {
+                            foreach (Process p in getChildren(PID.Id)) {
+                                p.CloseMainWindow();
+                            }
+                            return;
                         }
                         Thread.Sleep(1000);
                     }
