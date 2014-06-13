@@ -141,6 +141,7 @@ namespace rlel {
             else {
                 this.evePath.Text = Properties.Settings.Default.SisiPath;
             }
+            this.tray.ContextMenu.MenuItems[1].Checked = (bool)this.singularity.IsChecked;
         }
 
         private void evePath_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) {
