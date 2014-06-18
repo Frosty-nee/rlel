@@ -314,7 +314,8 @@ namespace rlel {
             repair.WorkingDirectory = path;
             repair.WindowStyle = ProcessWindowStyle.Minimized;
             Process proc = System.Diagnostics.Process.Start(repair);
-            Thread akill = new Thread(() => MainWindow.kill(Path.Combine(repair.WorkingDirectory, "launcher", "cache", String.Format("launcher.{0}.log", this.findLatestLog())), proc));
+            string log = Path.Combine(repair.WorkingDirectory, "launcher", "cache", String.Format("launcher.{0}.log", DateTime.UtcNow.ToString("yyyy-MM-dd")));
+            Thread akill = new Thread(() => MainWindow.kill(log, proc));
             akill.Start();
 
             if (!sisi)
@@ -322,18 +323,6 @@ namespace rlel {
             else
                 sisipatching = akill;
 
-        }
-
-        private string findLatestLog() {
-            DateTime date = DateTime.UtcNow;
-            string month;
-            if (date.Month < 10)
-                month = "0" + Convert.ToInt32(date.Month);
-
-            else
-                month = Convert.ToString(date.Month);
-
-            return String.Format("{0}-{1}-{2}", date.Year, month, date.Day);
         }
 
         public static void kill(string path, Process PID) {
@@ -344,19 +333,29 @@ namespace rlel {
             using (FileStream fs = new FileStream
                  (path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
                 using (StreamReader sr = new StreamReader(fs)) {
-                    sr.ReadToEnd();
+                    string s = sr.ReadToEnd();
                     while (true) {
-                        string s = sr.ReadToEnd();
+                        s = sr.ReadToEnd();
                         if (s.Contains("Client update: successful")) {
                             foreach (Process p in getChildren(PID.Id)) {
                                 p.CloseMainWindow();
                             }
                             return;
                         }
+                        if (allChildrenDead(PID.Id))
+                            return;
                         Thread.Sleep(1000);
                     }
                 }
             }
+        }
+
+        private static bool allChildrenDead(int id) {
+            foreach (Process p in getChildren(id)) {
+                if (!p.HasExited)
+                    return false;
+            }
+            return true;
         }
 
         private static IEnumerable<Process> getChildren(int id) {
