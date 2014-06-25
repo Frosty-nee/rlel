@@ -9,7 +9,9 @@ Tranquility and Singularity clients, as well as keeping those clients up to date
 
 ### are there binaries?
 
-http://frosty-nee.net/r/rlel.exe 
+an installer can be found at 
+
+http://frosty-nee.net/rlel/setup.exe
 
 ### are passwords encrypted?
 
