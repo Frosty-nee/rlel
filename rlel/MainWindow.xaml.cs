@@ -308,12 +308,19 @@ namespace rlel {
             if (sisi && sisipatching != null && sisipatching.IsAlive)
                 return;
 
+            Process p = isLauncherRunning(path);
             System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\eve.exe", "");
             if (sisi)
                 repair = new System.Diagnostics.ProcessStartInfo(@".\eve.exe", "/server:singularity");
             repair.WorkingDirectory = path;
             repair.WindowStyle = ProcessWindowStyle.Minimized;
-            Process proc = System.Diagnostics.Process.Start(repair);
+            Process proc;
+            if (p == null) {
+                proc = System.Diagnostics.Process.Start(repair);
+            }
+            else {
+                proc = p;
+            }
             string log = Path.Combine(repair.WorkingDirectory, "launcher", "cache", String.Format("launcher.{0}.log", DateTime.UtcNow.ToString("yyyy-MM-dd")));
             Thread akill = new Thread(() => MainWindow.kill(log, proc));
             akill.Start();
@@ -330,6 +337,7 @@ namespace rlel {
                 FileStream f = File.Create(path);
                 f.Close();
             }
+            Thread.Sleep(5000);
             using (FileStream fs = new FileStream
                  (path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
                 using (StreamReader sr = new StreamReader(fs)) {
@@ -358,6 +366,18 @@ namespace rlel {
             return true;
         }
 
+        private Process isLauncherRunning(string path) {
+            Process[] plist = Process.GetProcessesByName("launcher");
+            foreach (Process p in plist) {
+                if (((List<Process>)getChildren(p.Id)).Count == 0) {
+                    string split = p.Modules[0].FileName.Split(new string[] {"launcher"}, StringSplitOptions.None)[0];
+                    if (path.ToLower() == split.ToLower().Substring(0, split.Length-1))
+                        return p;
+                }
+            }
+            return null;
+        }
+
         private static IEnumerable<Process> getChildren(int id) {
             List<Process> children = new List<Process>();
             List<Process> grandchildren = new List<Process>();
@@ -370,6 +390,7 @@ namespace rlel {
             }
             children.AddRange(grandchildren);
             return children;
+            
         }
 
         private void autoUpdate_Click(object sender, RoutedEventArgs e) {
