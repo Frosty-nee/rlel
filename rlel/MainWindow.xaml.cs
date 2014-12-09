@@ -103,7 +103,6 @@ namespace rlel {
             this.checkClientVersion();
         }
 
-
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
             this.tray.Visible = false;
         }
@@ -257,7 +256,6 @@ namespace rlel {
             this.popContextMenu();
         }
 
-
         private void updateEveVersion() {
             if (DateTime.UtcNow > this.updateCheckExpire) {
                 System.Net.WebClient wc = new System.Net.WebClient();
@@ -333,13 +331,10 @@ namespace rlel {
         }
 
         public static void kill(string path, Process PID) {
-            if (!File.Exists(path)) {
-                FileStream f = File.Create(path);
-                f.Close();
-            }
+            while (!File.Exists(path))
+                Thread.Sleep(1000);
             Thread.Sleep(5000);
-            using (FileStream fs = new FileStream
-                 (path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+            using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
                 using (StreamReader sr = new StreamReader(fs)) {
                     string s = sr.ReadToEnd();
                     while (true) {
