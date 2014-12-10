@@ -11,7 +11,7 @@ Tranquility and Singularity clients, as well as keeping those clients up to date
 
 an installer can be found at 
 
-http://frosty-nee.net/rlel/setup.exe
+http://rlel.frosty-nee.net/rlel.msi
 
 ### are passwords encrypted?
 
