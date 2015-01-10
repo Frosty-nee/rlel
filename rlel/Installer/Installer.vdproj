@@ -208,9 +208,9 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Rapid Light EVE Launcher"
-        "ProductCode" = "8:{486BA64B-C847-46E0-8847-C0394339D32D}"
-        "PackageCode" = "8:{16C1F19B-2C16-4C85-BC2E-85327CA9099D}"
-        "UpgradeCode" = "8:{35E128BF-6356-4B70-B249-E68CEF50A28B}"
+        "ProductCode" = "8:{010386D3-D77C-405A-B802-25408D88B677}"
+        "PackageCode" = "8:{EE6C52AA-F33E-4E2D-831B-6E6A296E7017}"
+        "UpgradeCode" = "8:{E42470BF-7D92-470D-9625-CC488FEC0210}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"

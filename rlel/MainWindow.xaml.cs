@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Management;
+using System.Reflection;
 
 namespace rlel {
     /// <summary>
@@ -73,7 +74,7 @@ namespace rlel {
                     Properties.Settings.Default.Save();
                 }
             }
-
+            this.updater();
             this.evePath.Text = Properties.Settings.Default.TranqPath;
             this.tray = new System.Windows.Forms.NotifyIcon();
             this.tray.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ResourceAssembly.Location);
@@ -459,6 +460,19 @@ namespace rlel {
                 Properties.Settings.Default.Upgrade();
                 Properties.Settings.Default.upgraded = true;
                 Properties.Settings.Default.Save(); 
+            }
+        }
+
+        private void updater() {
+            System.Net.WebClient wc = new System.Net.WebClient();
+            string str = wc.DownloadString(new Uri("http://rlel.frosty-nee.net/VERSION"));
+            String[] splat = str.Split(new String[] {"\r\n", " "} , StringSplitOptions.RemoveEmptyEntries);
+            Version lv = Version.Parse(Assembly.GetExecutingAssembly().GetName().Version.ToString());
+            Version rv = Version.Parse(splat[1].ToString());
+            if (lv < rv) {
+                update u = new update();
+                u.ShowDialog();
+                
             }
         }
     }
