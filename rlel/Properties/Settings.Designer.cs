@@ -105,5 +105,17 @@ namespace rlel.Properties {
                 this["dx9"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool upgraded {
+            get {
+                return ((bool)(this["upgraded"]));
+            }
+            set {
+                this["upgraded"] = value;
+            }
+        }
     }
 }

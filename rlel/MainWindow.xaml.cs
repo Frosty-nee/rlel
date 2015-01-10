@@ -27,6 +27,7 @@ namespace rlel {
         Thread sisipatching;
 
         public MainWindow() {
+            this.settings_upgrade();
             InitializeComponent();
             string key = this.getKey();
             string iv = this.getIV();
@@ -451,6 +452,14 @@ namespace rlel {
         private void dx9_Click(object sender, RoutedEventArgs e) {
             Properties.Settings.Default.dx9 = (bool)this.dx9.IsChecked;
             Properties.Settings.Default.Save();
+        }
+
+        private void settings_upgrade() {
+            if (Properties.Settings.Default.upgraded != true) {
+                Properties.Settings.Default.Upgrade();
+                Properties.Settings.Default.upgraded = true;
+                Properties.Settings.Default.Save(); 
+            }
         }
     }
 }

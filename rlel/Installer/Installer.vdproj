@@ -87,6 +87,19 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.0,Profile=Client"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4 Client Profile (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.0,Profile=Client"
+                    }
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Windows.Installer.3.1"
+                    {
+                    "Name" = "8:Windows Installer 3.1"
+                    "ProductCode" = "8:Microsoft.Windows.Installer.3.1"
+                    }
+                }
             }
         }
     }
@@ -195,15 +208,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Rapid Light EVE Launcher"
-        "ProductCode" = "8:{6FD6F7BF-58D5-45EE-ABF9-8276E4B23961}"
-        "PackageCode" = "8:{8B2735E8-D8B1-4DA8-9FA4-7A8594C5B643}"
+        "ProductCode" = "8:{486BA64B-C847-46E0-8847-C0394339D32D}"
+        "PackageCode" = "8:{16C1F19B-2C16-4C85-BC2E-85327CA9099D}"
         "UpgradeCode" = "8:{35E128BF-6356-4B70-B249-E68CEF50A28B}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.2.8"
+        "ProductVersion" = "8:1.2"
         "Manufacturer" = "8:rlel"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
