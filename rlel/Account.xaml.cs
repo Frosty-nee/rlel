@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.IO;
 using System.Net;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace rlel {
     /// <summary>
@@ -17,7 +18,13 @@ namespace rlel {
         string sisiToken;
         DateTime tranqTokenExpiration;
         DateTime sisiTokenExpiration;
+        private Process tranqProcess;
+        private Process sisiProcess;
 
+        [DllImport("user32.dll")]
+        public static extern IntPtr SetActiveWindow (IntPtr hwnd);
+        [DllImport("user32.dll")]
+        public static extern bool SetForegroundWindow (IntPtr hwnd);
 
         public Account(MainWindow main) {
             InitializeComponent();
@@ -33,6 +40,30 @@ namespace rlel {
         private void launch_Click(object sender, RoutedEventArgs e) {
             this.launchAccount();
         }
+
+        public bool activateAccount () {
+            if (!ClientIsRunning( ))
+                return launchAccount( );
+
+            Process eveProcess = tranqProcess;
+            if (this.main.singularity.IsChecked == true)
+                eveProcess = sisiProcess;
+
+            if (eveProcess == null || eveProcess.HasExited)
+                return false;
+
+            IntPtr wndHnd = eveProcess.MainWindowHandle;
+            if (wndHnd == null)
+                return false;
+
+            if (!SetForegroundWindow(wndHnd))
+                return false;
+
+            if (SetActiveWindow(wndHnd) == null)
+                return false;
+            return true;
+        }
+
 
         public bool launchAccount() {
             string accessToken = this.tranqToken;
@@ -81,12 +112,32 @@ namespace rlel {
             );
             if (this.main.singularity.IsChecked == true) {
                 psi.WorkingDirectory = Properties.Settings.Default.SisiPath;
+                this.sisiProcess = System.Diagnostics.Process.Start(psi);
+                this.sisiProcess.EnableRaisingEvents = true;
+                this.sisiProcess.Exited += sisiProcess_Exited;
+                runningSiSi.Visibility = Visibility.Visible;
             }
             else {
                 psi.WorkingDirectory = Properties.Settings.Default.TranqPath;
+                this.tranqProcess = System.Diagnostics.Process.Start(psi);
+                this.tranqProcess.EnableRaisingEvents = true;
+                this.tranqProcess.Exited += tranqProcess_Exited;
+                runningTQ.Visibility = Visibility.Visible;
             }
-            System.Diagnostics.Process.Start(psi);
             return true;
+        }
+        void sisiProcess_Exited (object sender, EventArgs e) {
+            this.sisiProcess = null;
+            runningSiSi.Dispatcher.Invoke((System.Windows.Forms.MethodInvoker)delegate {
+                runningSiSi.Visibility = Visibility.Hidden;
+            });
+
+        }
+        void tranqProcess_Exited (object sender, EventArgs e) {
+            this.tranqProcess = null;
+            runningTQ.Dispatcher.Invoke((System.Windows.Forms.MethodInvoker)delegate {
+                runningTQ.Visibility = Visibility.Hidden;
+            });
         }
 
         private string getAccessToken(string username, string password) {
@@ -162,6 +213,15 @@ namespace rlel {
 
         private void UserControl_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
             this.launchAccount();
+        }
+
+        public bool ClientIsRunning() {
+            if (this.main.singularity.IsChecked == false && this.tranqProcess != null)
+                return !this.tranqProcess.HasExited;
+            else if (this.main.singularity.IsChecked == true && this.sisiProcess != null)
+                return !this.sisiProcess.HasExited;
+            else
+                return false;
         }
     }
 }

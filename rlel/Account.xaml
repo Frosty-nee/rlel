@@ -5,7 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" Height="20" Width="250" MouseDoubleClick="UserControl_MouseDoubleClick" >
     <Grid>
-        <TextBlock Name="username" Width="250" VerticalAlignment="Center" Height="18" />
+        <TextBlock Name="username" Width="250" VerticalAlignment="Center" Height="18" ScrollViewer.VerticalScrollBarVisibility="Disabled" />
         <PasswordBox Name="password" Password="" Visibility="Hidden" Margin="138,-1,162,1" />
+        <Label Name="runningTQ" Content="TQ"  VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,1,0" Height="18" Width="20" Padding="0" Visibility="Hidden"/>
+        <Label Name="runningSiSi" Content="SISI" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,25,0" Height="18" Padding="0" Visibility="Hidden"/>
     </Grid>
 </UserControl>
