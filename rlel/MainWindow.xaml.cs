@@ -98,13 +98,16 @@ namespace rlel {
             this.autoUpdate.IsChecked = Properties.Settings.Default.autoPatch;
             this.dx9.IsChecked = Properties.Settings.Default.dx9;
             if (Properties.Settings.Default.autoPatch) {
-                this.checkClientVersion();
+                Thread client = new Thread(() => MainWindow.checkClientVersion(this));
+                client.Start();
+
                 this.checkUpdate.Enabled = true;
             }
         }
 
         void checkUpdate_Elapsed(object sender, ElapsedEventArgs e) {
-            this.checkClientVersion();
+            Thread client = new Thread(() => MainWindow.checkClientVersion(this));
+            client.Start();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
@@ -273,26 +276,26 @@ namespace rlel {
             }
         }
 
-        private void checkClientVersion() {
-            this.updateEveVersion();
+        private static void checkClientVersion(MainWindow main) {
+            main.updateEveVersion();
             StreamReader sr;
             int clientVers;
-            if (this.checkFilePaths(Properties.Settings.Default.TranqPath)) {
+            if (main.checkFilePaths(Properties.Settings.Default.TranqPath)) {
                 sr = new StreamReader(String.Format("{0}\\{1}", Properties.Settings.Default.TranqPath, "start.ini"));
                 sr.ReadLine(); sr.ReadLine();
 
                 clientVers = Convert.ToInt32(sr.ReadLine().Substring(8));
-                if (this.tranqVersion != clientVers) {
-                    this.patch(Properties.Settings.Default.TranqPath, false);
+                if (main.tranqVersion != clientVers) {
+                    main.patch(Properties.Settings.Default.TranqPath, false);
                 }
                 sr.Close();
             }
-            if (this.checkFilePaths(Properties.Settings.Default.SisiPath)) {
+            if (main.checkFilePaths(Properties.Settings.Default.SisiPath)) {
                 sr = new StreamReader(String.Format("{0}\\{1}", Properties.Settings.Default.SisiPath, "start.ini"));
                 sr.ReadLine(); sr.ReadLine();
                 clientVers = Convert.ToInt32(sr.ReadLine().Substring(8));
-                if (this.sisiVersion != clientVers) {
-                    this.patch(Properties.Settings.Default.SisiPath, true);
+                if (main.sisiVersion != clientVers) {
+                    main.patch(Properties.Settings.Default.SisiPath, true);
                 }
                 sr.Close();
             }
@@ -394,7 +397,8 @@ namespace rlel {
 
         private void autoUpdate_Click(object sender, RoutedEventArgs e) {
             if (autoUpdate.IsChecked == true) {
-                this.checkClientVersion();
+                Thread client = new Thread(() => MainWindow.checkClientVersion(this));
+                client.Start();
                 this.checkUpdate.Enabled = true;
             }
             if (autoUpdate.IsChecked == false) {
