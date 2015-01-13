@@ -74,7 +74,9 @@ namespace rlel {
                     Properties.Settings.Default.Save();
                 }
             }
-            this.updater();
+            Thread update_check = new Thread(() => MainWindow.updater());
+            update_check.SetApartmentState(ApartmentState.STA);
+            update_check.Start();
             this.evePath.Text = Properties.Settings.Default.TranqPath;
             this.tray = new System.Windows.Forms.NotifyIcon();
             this.tray.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ResourceAssembly.Location);
@@ -463,16 +465,15 @@ namespace rlel {
             }
         }
 
-        private void updater() {
+        public static void updater() {
             System.Net.WebClient wc = new System.Net.WebClient();
             string str = wc.DownloadString(new Uri("http://rlel.frosty-nee.net/VERSION"));
             String[] splat = str.Split(new String[] {"\r\n", " "} , StringSplitOptions.RemoveEmptyEntries);
-            Version lv = Version.Parse(Assembly.GetExecutingAssembly().GetName().Version.ToString());
-            Version rv = Version.Parse(splat[1].ToString());
-            if (lv < rv) {
+            Version localversion = Version.Parse(Assembly.GetExecutingAssembly().GetName().Version.ToString());
+            Version remoteversion = Version.Parse(splat[1].ToString());
+            if (localversion < remoteversion) {
                 update u = new update();
                 u.ShowDialog();
-                
             }
         }
     }

@@ -23,5 +23,13 @@ namespace rlel {
         private void ok_Click(object sender, RoutedEventArgs e) {
             this.Close();
         }
+
+        private void msi_Click(object sender, RoutedEventArgs e) {
+            System.Diagnostics.Process.Start("http://rlel.frosty-nee.net/rlel.msi");
+        }
+
+        private void github_Click(object sender, RoutedEventArgs e) {
+            System.Diagnostics.Process.Start("http://github.com/frostbite/rlel");
+        }
     }
 }
