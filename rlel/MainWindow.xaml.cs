@@ -74,7 +74,8 @@ namespace rlel {
                     Properties.Settings.Default.Save();
                 }
             }
-            Thread update_check = new Thread(() => MainWindow.updater());
+
+            Thread update_check = new Thread(() => this.updater());
             update_check.SetApartmentState(ApartmentState.STA);
             update_check.Start();
             this.evePath.Text = Properties.Settings.Default.TranqPath;
@@ -98,7 +99,7 @@ namespace rlel {
             this.autoUpdate.IsChecked = Properties.Settings.Default.autoPatch;
             this.dx9.IsChecked = Properties.Settings.Default.dx9;
             if (Properties.Settings.Default.autoPatch) {
-                Thread client = new Thread(() => MainWindow.checkClientVersion(this));
+                Thread client = new Thread(() => this.checkClientVersion());
                 client.Start();
 
                 this.checkUpdate.Enabled = true;
@@ -106,7 +107,7 @@ namespace rlel {
         }
 
         void checkUpdate_Elapsed(object sender, ElapsedEventArgs e) {
-            Thread client = new Thread(() => MainWindow.checkClientVersion(this));
+            Thread client = new Thread(() => this.checkClientVersion());
             client.Start();
         }
 
@@ -276,26 +277,26 @@ namespace rlel {
             }
         }
 
-        private static void checkClientVersion(MainWindow main) {
-            main.updateEveVersion();
+        private void checkClientVersion() {
+            this.updateEveVersion();
             StreamReader sr;
             int clientVers;
-            if (main.checkFilePaths(Properties.Settings.Default.TranqPath)) {
+            if (this.checkFilePaths(Properties.Settings.Default.TranqPath)) {
                 sr = new StreamReader(String.Format("{0}\\{1}", Properties.Settings.Default.TranqPath, "start.ini"));
                 sr.ReadLine(); sr.ReadLine();
 
                 clientVers = Convert.ToInt32(sr.ReadLine().Substring(8));
-                if (main.tranqVersion != clientVers) {
-                    main.patch(Properties.Settings.Default.TranqPath, false);
+                if (this.tranqVersion != clientVers) {
+                    this.patch(Properties.Settings.Default.TranqPath, false);
                 }
                 sr.Close();
             }
-            if (main.checkFilePaths(Properties.Settings.Default.SisiPath)) {
+            if (this.checkFilePaths(Properties.Settings.Default.SisiPath)) {
                 sr = new StreamReader(String.Format("{0}\\{1}", Properties.Settings.Default.SisiPath, "start.ini"));
                 sr.ReadLine(); sr.ReadLine();
                 clientVers = Convert.ToInt32(sr.ReadLine().Substring(8));
-                if (main.sisiVersion != clientVers) {
-                    main.patch(Properties.Settings.Default.SisiPath, true);
+                if (this.sisiVersion != clientVers) {
+                    this.patch(Properties.Settings.Default.SisiPath, true);
                 }
                 sr.Close();
             }
@@ -327,7 +328,7 @@ namespace rlel {
                 proc = p;
             }
             string log = Path.Combine(repair.WorkingDirectory, "launcher", "cache", String.Format("launcher.{0}.log", DateTime.UtcNow.ToString("yyyy-MM-dd")));
-            Thread akill = new Thread(() => MainWindow.kill(log, proc));
+            Thread akill = new Thread(() => this.kill(log, proc));
             akill.Start();
 
             if (!sisi)
@@ -337,7 +338,7 @@ namespace rlel {
 
         }
 
-        public static void kill(string path, Process PID) {
+        private void kill(string path, Process PID) {
             while (!File.Exists(path))
                 Thread.Sleep(1000);
             Thread.Sleep(5000);
@@ -397,7 +398,7 @@ namespace rlel {
 
         private void autoUpdate_Click(object sender, RoutedEventArgs e) {
             if (autoUpdate.IsChecked == true) {
-                Thread client = new Thread(() => MainWindow.checkClientVersion(this));
+                Thread client = new Thread(() => this.checkClientVersion());
                 client.Start();
                 this.checkUpdate.Enabled = true;
             }
@@ -469,7 +470,7 @@ namespace rlel {
             }
         }
 
-        public static void updater() {
+        private void updater() {
             System.Net.WebClient wc = new System.Net.WebClient();
             string str = wc.DownloadString(new Uri("http://rlel.frosty-nee.net/VERSION"));
             String[] splat = str.Split(new String[] {"\r\n", " "} , StringSplitOptions.RemoveEmptyEntries);
