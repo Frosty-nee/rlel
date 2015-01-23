@@ -267,10 +267,21 @@ namespace rlel {
         private void updateEveVersion() {
             if (DateTime.UtcNow > this.updateCheckExpire) {
                 System.Net.WebClient wc = new System.Net.WebClient();
-                string ds = wc.DownloadString(new Uri("http://client.eveonline.com/patches/premium_patchinfoTQ_inc.txt"));
+                string ds;
+                try {
+                    ds = wc.DownloadString(new Uri("http://client.eveonline.com/patches/premium_patchinfoTQ_inc.txt"));
+                }
+                catch {
+                    return;
+                }
                 this.tranqVersion = Convert.ToInt32(ds.Substring(6, 6));
 
-                ds = wc.DownloadString(new Uri("http://client.eveonline.com/patches/premium_patchinfoSISI_inc.txt"));
+                try {
+                    ds = wc.DownloadString(new Uri("http://client.eveonline.com/patches/premium_patchinfoSISI_inc.txt"));
+                }
+                catch {
+                    return;
+                }
                 this.sisiVersion = Convert.ToInt32(ds.Substring(6, 6));
                 this.updateCheckExpire = (DateTime.UtcNow + TimeSpan.FromHours(1));
                 wc.Dispose();
@@ -386,7 +397,11 @@ namespace rlel {
             List<Process> grandchildren = new List<Process>();
             ManagementObjectSearcher search = new ManagementObjectSearcher(String.Format("SELECT * FROM Win32_Process WHERE ParentProcessID={0}", id));
             foreach (ManagementObject mo in search.Get()) {
-                children.Add(Process.GetProcessById(Convert.ToInt32(mo["ProcessID"])));
+                try {
+                    children.Add(Process.GetProcessById(Convert.ToInt32(mo["ProcessID"])));
+                }
+                catch {
+                }
             }
             foreach (Process child in children) {
                 grandchildren.AddRange(getChildren(child.Id));
@@ -472,7 +487,14 @@ namespace rlel {
 
         private void updater() {
             System.Net.WebClient wc = new System.Net.WebClient();
-            string str = wc.DownloadString(new Uri("http://rlel.frosty-nee.net/VERSION"));
+            string str = "";
+            try {
+                str = wc.DownloadString(new Uri("http://rlel.frosty-nee.net/VERSION"));
+            }
+            catch (System.Net.WebException e) {
+                this.showBalloon("Error", "rlel version checking timed out", System.Windows.Forms.ToolTipIcon.Error);
+                return;
+            }
             String[] splat = str.Split(new String[] {"\r\n", " "} , StringSplitOptions.RemoveEmptyEntries);
             Version localversion = Version.Parse(Assembly.GetExecutingAssembly().GetName().Version.ToString());
             Version remoteversion = Version.Parse(splat[1].ToString());
