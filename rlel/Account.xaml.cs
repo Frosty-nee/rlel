@@ -6,12 +6,16 @@ using System.Windows.Controls;
 using System.IO;
 using System.Net;
 using System.Diagnostics;
+using System.Threading;
+using System.Security;
 
 namespace rlel {
     /// <summary>
     /// Interaction logic for Account.xaml
     /// </summary>
     public partial class Account : UserControl {
+        public delegate void balloon_event(string[] args, System.Windows.Forms.ToolTipIcon tti);
+        public event balloon_event show_balloon;
         private MainWindow main;
         string tranqToken;
         string sisiToken;
@@ -31,45 +35,50 @@ namespace rlel {
         }
 
         private void launch_Click(object sender, RoutedEventArgs e) {
-            this.launchAccount();
+            new Thread(()=>this.launchAccount(
+                (bool)this.main.singularity.IsChecked,
+                Path.Combine(this.main.evePath.Text, "bin", "exefile.exe"),
+                (bool)this.main.dx9.IsChecked,
+                this.username.Text,
+                this.password.SecurePassword)).Start();
         }
 
-        public bool launchAccount() {
+        public void launchAccount(bool sisi, string path, bool dx, string username, SecureString password ) {
+            Console.WriteLine(username);
             string accessToken = this.tranqToken;
             DateTime expire = this.tranqTokenExpiration;
-            if (this.main.singularity.IsChecked == true) {
+            if (sisi) {
                 accessToken = this.sisiToken;
                 expire = this.sisiTokenExpiration;
             }
-            string exefilePath = Path.Combine(this.main.evePath.Text, "bin", "ExeFile.exe");
-            if (!File.Exists(exefilePath)) {
-                this.main.showBalloon("eve path", "could not find " + exefilePath, System.Windows.Forms.ToolTipIcon.Error);
-                return false;
+            if (!File.Exists(path)) {
+                this.show_balloon(new string[] {"eve path", "could not find " + path}, System.Windows.Forms.ToolTipIcon.Error);
+                return;
             }
-            else if (this.username.Text.Length == 0 || this.password.Password.Length == 0) {
-                this.main.showBalloon("logging in", "missing username or password", System.Windows.Forms.ToolTipIcon.Error);
-                return false;
+            else if (username.Length == 0 || password.Length == 0) {
+                this.show_balloon(new string[] {"logging in", "missing username or password"}, System.Windows.Forms.ToolTipIcon.Error);
+                return;
             }
-            this.main.showBalloon("logging in", this.username.Text, System.Windows.Forms.ToolTipIcon.None);
+            this.show_balloon(new string[] {"logging in", username}, System.Windows.Forms.ToolTipIcon.None);
             string ssoToken = null;
             try {
-                ssoToken = this.getSSOToken(this.username.Text, this.password.Password);
+                ssoToken = this.getSSOToken(username, this.password.Password, sisi);
             }
             catch (WebException e) {
                 accessToken = null;
-                this.main.showBalloon("logging in", e.Message, System.Windows.Forms.ToolTipIcon.Error);
-                return false;
+                this.show_balloon(new string[] {"logging in", e.Message}, System.Windows.Forms.ToolTipIcon.Error);
+                return;
             }
             if (ssoToken == null) {
-                this.main.showBalloon("logging in", "invalid username/password", System.Windows.Forms.ToolTipIcon.Error);
-                return false;
+                this.show_balloon(new string[] {"logging in", "invalid username/password"}, System.Windows.Forms.ToolTipIcon.Error);
+                return;
             }
-            this.main.showBalloon("logging in", "launching", System.Windows.Forms.ToolTipIcon.None);
+            this.show_balloon(new string[] {"logging in", "launching"}, System.Windows.Forms.ToolTipIcon.None);
             string args;
             string dx9 = "dx11";
-            if (this.main.dx9.IsChecked == true)
+            if (dx)
                 dx9 = "dx9";
-            if (this.main.singularity.IsChecked == true) {
+            if (sisi) {
                 args = @"/noconsole /ssoToken={0} /triPlatform={1} /server:Singularity";
 
             }
@@ -79,30 +88,30 @@ namespace rlel {
             System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo(
                 @".\bin\ExeFile.exe", String.Format(args, ssoToken, dx9)
             );
-            if (this.main.singularity.IsChecked == true) {
+            if (sisi) {
                 psi.WorkingDirectory = Properties.Settings.Default.SisiPath;
             }
             else {
                 psi.WorkingDirectory = Properties.Settings.Default.TranqPath;
             }
             System.Diagnostics.Process.Start(psi);
-            return true;
+            return;
         }
 
-        private string getAccessToken(string username, string password) {
-            if (this.main.singularity.IsChecked == false && tranqToken != null && DateTime.UtcNow < this.tranqTokenExpiration)
+        private string getAccessToken(string username, string password, bool sisi) {
+            if (!sisi && tranqToken != null && DateTime.UtcNow < this.tranqTokenExpiration)
                 return this.tranqToken;
-            if (this.main.singularity.IsChecked == true && sisiToken != null && DateTime.UtcNow < this.sisiTokenExpiration)
+            if (sisi && sisiToken != null && DateTime.UtcNow < this.sisiTokenExpiration)
                 return this.sisiToken;
             string uri = "https://login.eveonline.com/Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Flogin.eveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken";
-            if (this.main.singularity.IsChecked == true) {
+            if (sisi) {
                 uri = "https://sisilogin.testeveonline.com//Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Fsisilogin.testeveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken";
             }
 
             HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(uri);
             req.Timeout = 5000;
             req.AllowAutoRedirect = true;
-            if (this.main.singularity.IsChecked == false) {
+            if (!sisi) {
                 req.Headers.Add("Origin", "https://login.eveonline.com");
             }
             else {
@@ -121,7 +130,7 @@ namespace rlel {
             // https://login.eveonline.com/launcher?client_id=eveLauncherTQ#access_token=...&token_type=Bearer&expires_in=43200
             string accessToken = this.extractAccessToken(resp.ResponseUri.Fragment);
             resp.Close(); // WTF.NET http://stackoverflow.com/questions/11712232/ and http://stackoverflow.com/questions/1500955/
-            if (this.main.singularity.IsChecked == false) {
+            if (!sisi) {
                 this.tranqToken = accessToken;
                 this.tranqTokenExpiration = DateTime.UtcNow + TimeSpan.FromHours(11);
             }
@@ -133,12 +142,12 @@ namespace rlel {
             return accessToken;
         }
 
-        private string getSSOToken(string username, string password) {
-            string accessToken = this.getAccessToken(username, password);
+        private string getSSOToken(string username, string password, bool sisi) {
+            string accessToken = this.getAccessToken(username, password, sisi);
             string uri = "https://login.eveonline.com/launcher/token?accesstoken=" + accessToken;
             if (accessToken == null)
                 return null;
-            if (this.main.singularity.IsChecked == true) {
+            if (sisi) {
                 uri = "https://sisilogin.testeveonline.com/launcher/token?accesstoken=" + accessToken;
             }
             HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(uri);
@@ -161,7 +170,7 @@ namespace rlel {
         }
 
         private void UserControl_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
-            this.launchAccount();
+            this.launch_Click(this, new RoutedEventArgs());
         }
     }
 }

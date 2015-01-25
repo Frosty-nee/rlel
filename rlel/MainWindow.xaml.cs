@@ -11,12 +11,14 @@ using System.Text;
 using System.Threading;
 using System.Management;
 using System.Reflection;
+using System.Security;
 
 namespace rlel {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
+        
         System.Windows.Forms.NotifyIcon tray;
         int tranqVersion;
         int sisiVersion;
@@ -34,6 +36,10 @@ namespace rlel {
             string iv = this.getIV();
             this.rjm.Key = Convert.FromBase64String(key);
             this.rjm.IV = Convert.FromBase64String(iv);
+        }
+
+        private void on_balloon_event(string[] args, System.Windows.Forms.ToolTipIcon tti) {
+            this.showBalloon(args[0], args[1], tti);
         }
 
         private void browse_Click(object sender, RoutedEventArgs e) {
@@ -165,6 +171,7 @@ namespace rlel {
         private void popAccounts() {
             foreach (string credentials in Properties.Settings.Default.accounts) {
                 Account account = new Account(this);
+                account.show_balloon += new Account.balloon_event(on_balloon_event);
                 string[] split = credentials.Split(new char[] { ':' }, 4);
                 account.username.Text = split[0];
                 account.password.Password = this.decryptPass(rjm, split[1]);
@@ -232,7 +239,12 @@ namespace rlel {
             else {
                 foreach (Account account in this.accountsPanel.Items) {
                     if (account.username.Text == username) {
-                        account.launchAccount();
+                        new Thread(()=>account.launchAccount(
+                            (bool)this.singularity.IsChecked,
+                            Path.Combine(this.evePath.Text, "bin", "exefile.exe"),
+                            (bool)this.dx9.IsChecked,
+                            account.username.Text,
+                            account.password.SecurePassword)).Start();
                         break;
                     }
                 }
@@ -467,8 +479,13 @@ namespace rlel {
         }
 
         private void launch_Click(object sender, RoutedEventArgs e) {
+            bool sisi = (bool)this.singularity.IsChecked;
+            bool dx9 = (bool)this.dx9.IsChecked;
+            string path = Path.Combine(this.evePath.Text, "bin", "exefile.exe");
             foreach (Account acct in this.accountsPanel.SelectedItems) {
-                acct.launchAccount();
+                string username = acct.username.Text;
+                SecureString password = acct.password.SecurePassword;
+                new Thread(()=>acct.launchAccount(sisi, path, dx9, username, password)).Start();
             }
         }
 
@@ -491,7 +508,7 @@ namespace rlel {
             try {
                 str = wc.DownloadString(new Uri("http://rlel.frosty-nee.net/VERSION"));
             }
-            catch (System.Net.WebException e) {
+            catch {
                 this.showBalloon("Error", "rlel version checking timed out", System.Windows.Forms.ToolTipIcon.Error);
                 return;
             }
