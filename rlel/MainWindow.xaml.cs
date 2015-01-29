@@ -532,11 +532,13 @@ namespace rlel {
         }
 
         public void addCommandLineArgs (string[] args) {
-            bringToForeground( );
-            this.commandQueue.Enqueue(args);
-            if (!this.checkingUpdate)
-                handleCommandLineArgs();
-
+            if (args.Length > 1 && args[1] != null) {
+                this.commandQueue.Enqueue(args);
+                if (!this.checkingUpdate)
+                    handleCommandLineArgs();
+            }
+            else
+                bringToForeground( );
 
         }
         private void handleCommandLineArgs(){
