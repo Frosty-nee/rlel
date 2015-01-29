@@ -26,6 +26,8 @@ namespace rlel {
         RijndaelManaged rjm = new RijndaelManaged();
         Thread tqpatching;
         Thread sisipatching;
+        bool checkingUpdate;
+        Queue<String[]> commandQueue;
 
         public MainWindow() {
             this.settings_upgrade();
@@ -34,6 +36,9 @@ namespace rlel {
             string iv = this.getIV();
             this.rjm.Key = Convert.FromBase64String(key);
             this.rjm.IV = Convert.FromBase64String(iv);
+            this.tray = new System.Windows.Forms.NotifyIcon( );
+            this.commandQueue = new Queue<string[]>( );
+            this.checkingUpdate = true;
         }
 
         private void browse_Click(object sender, RoutedEventArgs e) {
@@ -79,7 +84,7 @@ namespace rlel {
             update_check.SetApartmentState(ApartmentState.STA);
             update_check.Start();
             this.evePath.Text = Properties.Settings.Default.TranqPath;
-            this.tray = new System.Windows.Forms.NotifyIcon();
+            
             this.tray.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ResourceAssembly.Location);
             this.tray.Text = this.Title;
             this.tray.ContextMenu = new System.Windows.Forms.ContextMenu();
@@ -289,6 +294,7 @@ namespace rlel {
         }
 
         private void checkClientVersion() {
+            this.checkingUpdate = true;
             this.updateEveVersion();
             StreamReader sr;
             int clientVers;
@@ -310,6 +316,12 @@ namespace rlel {
                     this.patch(Properties.Settings.Default.SisiPath, true);
                 }
                 sr.Close();
+            }
+            this.checkingUpdate = false;
+            if (this.commandQueue.Count > 0)
+            {
+                App.Current.Dispatcher.BeginInvoke(
+                    (Action)(() => ((MainWindow)App.Current.MainWindow).handleCommandLineArgs( )));
             }
         }
 
@@ -468,7 +480,8 @@ namespace rlel {
 
         private void launch_Click(object sender, RoutedEventArgs e) {
             foreach (Account acct in this.accountsPanel.SelectedItems) {
-                acct.launchAccount();
+                if (!acct.ClientIsRunning())
+                    acct.launchAccount();
             }
         }
 
@@ -501,6 +514,74 @@ namespace rlel {
             if (localversion < remoteversion) {
                 update u = new update();
                 u.ShowDialog();
+            }
+        }
+
+        /// <summary>Brings main window to foreground.</summary>
+        public void bringToForeground () {
+            if (this.WindowState == WindowState.Minimized || this.Visibility == Visibility.Hidden) {
+                this.Show( );
+                this.WindowState = WindowState.Normal;
+            }
+
+            // According to some sources these steps gurantee that an app will be brought to foreground.
+            this.Activate( );
+            this.Topmost = true;
+            this.Topmost = false;
+            this.Focus( );
+        }
+
+        public void addCommandLineArgs (string[] args) {
+            if (args.Length > 1 && args[1] != null) {
+                this.commandQueue.Enqueue(args);
+                if (!this.checkingUpdate)
+                    handleCommandLineArgs();
+            }
+            else
+                bringToForeground( );
+
+        }
+        private void handleCommandLineArgs(){
+            while (commandQueue.Count > 0) {
+                string[] args = commandQueue.Dequeue( );
+
+                // first value in args is executing file path
+                if (args != null && args.Length > 1) {
+                    string lastCommand = string.Empty;
+                    for (int i = 1; i < args.Length; i++) {
+                        if (string.IsNullOrEmpty(args[i]))
+                            continue;
+                        switch (args[i].ToLower()) {
+                            case "-tq":
+                                this.singularity.IsChecked = false;
+                                singularity_Click(this, new RoutedEventArgs( ));
+                                lastCommand = string.Empty;
+                                break;
+                            case "-sisi":
+                                this.singularity.IsChecked = true;
+                                singularity_Click(this, new RoutedEventArgs( ));
+                                lastCommand = string.Empty;
+                                break;
+                            case "-l":
+                            case "--launch":
+                                lastCommand = "launch";
+                                break;
+                            default:
+                                // handling of command parameters
+                                switch (lastCommand) {
+                                    case "launch":
+                                        foreach (Account account in this.accountsPanel.Items) {
+                                            if (account.username.Text.ToLower( ) == args[i].ToLower( )) {
+                                                account.activateAccount( );
+                                                break;
+                                            }
+                                        }
+                                        break;
+                                }
+                                break;
+                        }
+                    }
+                }
             }
         }
     }
