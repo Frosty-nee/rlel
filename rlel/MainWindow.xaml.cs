@@ -38,7 +38,7 @@ namespace rlel {
             this.rjm.IV = Convert.FromBase64String(iv);
             this.tray = new System.Windows.Forms.NotifyIcon( );
             this.commandQueue = new Queue<string[]>( );
-            this.checkingUpdate = false;
+            this.checkingUpdate = true;
         }
 
         private void browse_Click(object sender, RoutedEventArgs e) {
