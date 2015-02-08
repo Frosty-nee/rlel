@@ -18,7 +18,7 @@ namespace rlel {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
-        
+
         System.Windows.Forms.NotifyIcon tray;
         int tranqVersion;
         int sisiVersion;
@@ -60,11 +60,38 @@ namespace rlel {
 
         private void addAccount_Click(object sender, RoutedEventArgs e) {
             Account acc = new Account(this);
+            acc.show_balloon += new Account.balloon_event(on_balloon_event);
             this.accountsPanel.Items.Add(acc);
             this.accountsPanel.SelectedItem = acc;
             this.user.Focus();
             this.user.SelectAll();
         }
+
+        private void save_Click(object sender, RoutedEventArgs e) {
+            if (this.accountsPanel.SelectedItem == null) {
+                return;
+            }
+            ((Account)this.accountsPanel.SelectedItem).username.Text = this.user.Text;
+            ((Account)this.accountsPanel.SelectedItem).password.Password = this.pass.Password;
+            this.updateCredentials();
+            this.accountsPanel.Items.Refresh();
+        }
+
+        private void remove_Click(object sender, RoutedEventArgs e) {
+            List<Account> acl = new List<Account>();
+            foreach (Account a in this.accountsPanel.SelectedItems) {
+                acl.Add(a);
+            }
+            foreach (Account acct in acl) {
+                this.accountsPanel.Items.Remove(acct);
+                acct.show_balloon -= new Account.balloon_event(on_balloon_event);
+            }
+            this.updateCredentials();
+            if (this.accountsPanel.Items.Count > 0) {
+                this.accountsPanel.SelectedItem = this.accountsPanel.Items[0];
+            }
+        }
+
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             if (Properties.Settings.Default.TranqPath.Length == 0) {
@@ -239,7 +266,7 @@ namespace rlel {
             else {
                 foreach (Account account in this.accountsPanel.Items) {
                     if (account.username.Text == username) {
-                        new Thread(()=>account.launchAccount(
+                        new Thread(() => account.launchAccount(
                             (bool)this.singularity.IsChecked,
                             Path.Combine(this.evePath.Text, "bin", "exefile.exe"),
                             (bool)this.dx9.IsChecked,
@@ -396,8 +423,8 @@ namespace rlel {
             Process[] plist = Process.GetProcessesByName("launcher");
             foreach (Process p in plist) {
                 if (((List<Process>)getChildren(p.Id)).Count == 0) {
-                    string split = p.Modules[0].FileName.Split(new string[] {"launcher"}, StringSplitOptions.None)[0];
-                    if (path.ToLower() == split.ToLower().Substring(0, split.Length-1))
+                    string split = p.Modules[0].FileName.Split(new string[] { "launcher" }, StringSplitOptions.None)[0];
+                    if (path.ToLower() == split.ToLower().Substring(0, split.Length - 1))
                         return p;
                 }
             }
@@ -420,7 +447,7 @@ namespace rlel {
             }
             children.AddRange(grandchildren);
             return children;
-            
+
         }
 
         private void autoUpdate_Click(object sender, RoutedEventArgs e) {
@@ -436,45 +463,12 @@ namespace rlel {
             Properties.Settings.Default.Save();
         }
 
-        private void save_Click(object sender, RoutedEventArgs e) {
-            if (this.accountsPanel.SelectedItem != null) {
-                ((Account)this.accountsPanel.SelectedItem).username.Text = this.user.Text;
-                ((Account)this.accountsPanel.SelectedItem).password.Password = this.pass.Password;
-                this.updateCredentials();
-                this.accountsPanel.Items.Refresh();
-            }
-            else {
-                Account acct = new Account(this);
-                acct.username.Text = this.user.Text;
-                acct.password.Password = this.pass.Password;
-                this.accountsPanel.Items.Add(acct);
-                this.updateCredentials();
-                this.accountsPanel.Items.Refresh();
-            }
-        }
-
         private void accountsPanel_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
             if (this.accountsPanel.SelectedItem != null) {
                 if (((Account)this.accountsPanel.SelectedItem).username.Text != null)
                     this.user.Text = ((Account)this.accountsPanel.SelectedItem).username.Text;
                 if (((Account)this.accountsPanel.SelectedItem).password.Password != null)
                     this.pass.Password = ((Account)this.accountsPanel.SelectedItem).password.Password;
-            }
-        }
-
-        private void remove_Click(object sender, RoutedEventArgs e) {
-            if (this.accountsPanel.SelectedItems != null) {
-                List<Account> accounts = new List<Account>();
-                foreach (Account acct in this.accountsPanel.SelectedItems) {
-                    accounts.Add(acct);
-                }
-                foreach (Account acct in accounts) {
-                    this.accountsPanel.Items.Remove(acct);
-                }
-                this.updateCredentials();
-                if (this.accountsPanel.Items.Count > 0) {
-                    this.accountsPanel.SelectedItem = this.accountsPanel.Items[0];
-                }
             }
         }
 
@@ -485,7 +479,8 @@ namespace rlel {
             foreach (Account acct in this.accountsPanel.SelectedItems) {
                 string username = acct.username.Text;
                 SecureString password = acct.password.SecurePassword;
-                new Thread(()=>acct.launchAccount(sisi, path, dx9, username, password)).Start();
+                new Thread(() => acct.launchAccount(sisi, path, dx9, username, password)).Start();
+                Thread.Sleep(100); // there is a better way to fix this but meh for now
             }
         }
 
@@ -498,7 +493,7 @@ namespace rlel {
             if (Properties.Settings.Default.upgraded != true) {
                 Properties.Settings.Default.Upgrade();
                 Properties.Settings.Default.upgraded = true;
-                Properties.Settings.Default.Save(); 
+                Properties.Settings.Default.Save();
             }
         }
 
@@ -512,7 +507,7 @@ namespace rlel {
                 this.showBalloon("Error", "rlel version checking timed out", System.Windows.Forms.ToolTipIcon.Error);
                 return;
             }
-            String[] splat = str.Split(new String[] {"\r\n", " "} , StringSplitOptions.RemoveEmptyEntries);
+            String[] splat = str.Split(new String[] { "\r\n", " " }, StringSplitOptions.RemoveEmptyEntries);
             Version localversion = Version.Parse(Assembly.GetExecutingAssembly().GetName().Version.ToString());
             Version remoteversion = Version.Parse(splat[1].ToString());
             if (localversion < remoteversion) {
@@ -522,3 +517,6 @@ namespace rlel {
         }
     }
 }
+
+
+

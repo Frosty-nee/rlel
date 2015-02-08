@@ -44,7 +44,6 @@ namespace rlel {
         }
 
         public void launchAccount(bool sisi, string path, bool dx, string username, SecureString password ) {
-            Console.WriteLine(username);
             string accessToken = this.tranqToken;
             DateTime expire = this.tranqTokenExpiration;
             if (sisi) {
