@@ -1,3 +1,5 @@
+# Support for this project has been discontinued and it's unlikely it will even function anymore
+
 # Rapid Light EVE Launcher
 
 rlel (yes I hate this acronym too) is a replacement for the CCP launcher that supports launching both 
