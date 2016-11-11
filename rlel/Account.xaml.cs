@@ -38,12 +38,11 @@ namespace rlel {
             new Thread(()=>this.launchAccount(
                 (bool)this.main.singularity.IsChecked,
                 Path.Combine(this.main.evePath.Text, "bin", "exefile.exe"),
-                (bool)this.main.dx9.IsChecked,
                 this.username.Text,
                 this.password.SecurePassword)).Start();
         }
 
-        public void launchAccount(bool sisi, string path, bool dx, string username, SecureString password ) {
+        public void launchAccount(bool sisi, string path, string username, SecureString password ) {
             string accessToken = this.tranqToken;
             DateTime expire = this.tranqTokenExpiration;
             if (sisi) {
@@ -75,17 +74,15 @@ namespace rlel {
             this.show_balloon(new string[] {"logging in", "launching"}, System.Windows.Forms.ToolTipIcon.None);
             string args;
             string dx9 = "dx11";
-            if (dx)
-                dx9 = "dx9";
             if (sisi) {
-                args = @"/noconsole /ssoToken={0} /triPlatform={1} /server:Singularity";
+                args = @"/noconsole /ssoToken={0} /server:Singularity";
 
             }
             else {
-                args = @"/noconsole /ssoToken={0} /triPlatform={1}";
+                args = @"/noconsole /ssoToken={0}";
             }
             System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo(
-                @".\bin\ExeFile.exe", String.Format(args, ssoToken, dx9)
+                @".\bin\ExeFile.exe", String.Format(args, ssoToken)
             );
             if (sisi) {
                 psi.WorkingDirectory = Properties.Settings.Default.SisiPath;
