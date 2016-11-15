@@ -1,4 +1,4 @@
-# Support for this project has been discontinued and it's unlikely it will even function anymore
+# Project is currently not working, but is in the process of being updated. 
 
 # Rapid Light EVE Launcher
 
