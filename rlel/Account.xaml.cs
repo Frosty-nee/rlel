@@ -14,9 +14,9 @@ namespace rlel {
     /// Interaction logic for Account.xaml
     /// </summary>
     public partial class Account : UserControl {
-        public delegate void balloon_event(string[] args, System.Windows.Forms.ToolTipIcon tti);
-        public event balloon_event show_balloon;
-        private MainWindow main;
+        public delegate void balloonEvent(string[] args, System.Windows.Forms.ToolTipIcon tti);
+		public event balloonEvent showBalloon;
+		MainWindow main;
         string tranqToken;
         string sisiToken;
         DateTime tranqTokenExpiration;
@@ -29,20 +29,21 @@ namespace rlel {
 
         }
 
-        private void remove_Click(object sender, RoutedEventArgs e) {
+        private void removeClick(object sender, RoutedEventArgs e) {
             this.main.accountsPanel.Items.Remove(this);
             this.main.updateCredentials();
         }
 
-        private void launch_Click(object sender, RoutedEventArgs e) {
+        private void launchClick(object sender, RoutedEventArgs e) {
             new Thread(()=>this.launchAccount(
                 (bool)this.main.singularity.IsChecked,
                 Path.Combine(this.main.evePath.Text, "bin", "exefile.exe"),
+				this.accountName.Text,
                 this.username.Text,
                 this.password.SecurePassword)).Start();
         }
 
-        public void launchAccount(bool sisi, string path, string username, SecureString password ) {
+        public void launchAccount(bool sisi, string path,string accountName, string username, SecureString password ) {
             string accessToken = this.tranqToken;
             DateTime expire = this.tranqTokenExpiration;
             if (sisi) {
@@ -50,30 +51,29 @@ namespace rlel {
                 expire = this.sisiTokenExpiration;
             }
             if (!File.Exists(path)) {
-                this.show_balloon(new string[] {"eve path", "could not find " + path}, System.Windows.Forms.ToolTipIcon.Error);
+                this.showBalloon(new string[] {"eve path", "could not find " + path}, System.Windows.Forms.ToolTipIcon.Error);
                 return;
             }
             else if (username.Length == 0 || password.Length == 0) {
-                this.show_balloon(new string[] {"logging in", "missing username or password"}, System.Windows.Forms.ToolTipIcon.Error);
+                this.showBalloon(new string[] {"logging in", "missing username or password"}, System.Windows.Forms.ToolTipIcon.Error);
                 return;
             }
-            this.show_balloon(new string[] {"logging in", username}, System.Windows.Forms.ToolTipIcon.None);
+            this.showBalloon(new string[] {"logging in", accountName}, System.Windows.Forms.ToolTipIcon.None);
             string ssoToken = null;
             try {
                 ssoToken = this.getSSOToken(username, this.password.Password, sisi);
             }
             catch (WebException e) {
                 accessToken = null;
-                this.show_balloon(new string[] {"logging in", e.Message}, System.Windows.Forms.ToolTipIcon.Error);
+                this.showBalloon(new string[] {"logging in", e.Message}, System.Windows.Forms.ToolTipIcon.Error);
                 return;
             }
             if (ssoToken == null) {
-                this.show_balloon(new string[] {"logging in", "invalid username/password"}, System.Windows.Forms.ToolTipIcon.Error);
+                this.showBalloon(new string[] {"logging in", "invalid username/password"}, System.Windows.Forms.ToolTipIcon.Error);
                 return;
             }
-            this.show_balloon(new string[] {"logging in", "launching"}, System.Windows.Forms.ToolTipIcon.None);
+            this.showBalloon(new string[] {"logging in", "launching"}, System.Windows.Forms.ToolTipIcon.None);
             string args;
-            string dx9 = "dx11";
             if (sisi) {
                 args = @"/noconsole /ssoToken={0} /server:Singularity";
 
@@ -166,7 +166,7 @@ namespace rlel {
         }
 
         private void UserControl_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
-            this.launch_Click(this, new RoutedEventArgs());
+            this.launchClick(this, new RoutedEventArgs());
         }
     }
 }

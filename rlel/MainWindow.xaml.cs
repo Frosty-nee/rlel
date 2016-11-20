@@ -30,7 +30,7 @@ namespace rlel {
         Thread sisipatching;
 
         public MainWindow() {
-            this.settings_upgrade();
+            this.settingsUpgrade();
             InitializeComponent();
             string key = this.getKey();
             string iv = this.getIV();
@@ -38,11 +38,11 @@ namespace rlel {
             this.rjm.IV = Convert.FromBase64String(iv);
         }
 
-        private void on_balloon_event(string[] args, System.Windows.Forms.ToolTipIcon tti) {
+        private void onballoonEvent(string[] args, System.Windows.Forms.ToolTipIcon tti) {
             this.showBalloon(args[0], args[1], tti);
         }
 
-        private void browse_Click(object sender, RoutedEventArgs e) {
+        private void browseClick(object sender, RoutedEventArgs e) {
             System.Windows.Forms.FolderBrowserDialog fbd = new System.Windows.Forms.FolderBrowserDialog();
             fbd.ShowNewFolderButton = false;
             fbd.SelectedPath = this.evePath.Text;
@@ -51,40 +51,41 @@ namespace rlel {
             }
         }
 
-        private void Window_StateChanged(object sender, EventArgs e) {
+        private void windowStateChanged(object sender, EventArgs e) {
             this.ShowInTaskbar = (this.WindowState != System.Windows.WindowState.Minimized);
             if (this.WindowState == System.Windows.WindowState.Minimized) {
                 this.Hide();
             }
         }
 
-        private void addAccount_Click(object sender, RoutedEventArgs e) {
+        private void addAccountClick(object sender, RoutedEventArgs e) {
             Account acc = new Account(this);
-            acc.show_balloon += new Account.balloon_event(on_balloon_event);
+            acc.showBalloon += new Account.balloonEvent(onballoonEvent);
             this.accountsPanel.Items.Add(acc);
             this.accountsPanel.SelectedItem = acc;
             this.user.Focus();
             this.user.SelectAll();
         }
 
-        private void save_Click(object sender, RoutedEventArgs e) {
+        private void saveClick(object sender, RoutedEventArgs e) {
             if (this.accountsPanel.SelectedItem == null) {
                 return;
             }
+			((Account)this.accountsPanel.SelectedItem).accountName.Text = this.accountName.Text;
             ((Account)this.accountsPanel.SelectedItem).username.Text = this.user.Text;
             ((Account)this.accountsPanel.SelectedItem).password.Password = this.pass.Password;
             this.updateCredentials();
             this.accountsPanel.Items.Refresh();
         }
 
-        private void remove_Click(object sender, RoutedEventArgs e) {
+        private void removeClick(object sender, RoutedEventArgs e) {
             List<Account> acl = new List<Account>();
             foreach (Account a in this.accountsPanel.SelectedItems) {
                 acl.Add(a);
             }
             foreach (Account acct in acl) {
                 this.accountsPanel.Items.Remove(acct);
-                acct.show_balloon -= new Account.balloon_event(on_balloon_event);
+                acct.showBalloon -= new Account.balloonEvent(onballoonEvent);
             }
             this.updateCredentials();
             if (this.accountsPanel.Items.Count > 0) {
@@ -93,7 +94,7 @@ namespace rlel {
         }
 
 
-        private void Window_Loaded(object sender, RoutedEventArgs e) {
+        private void windowLoaded(object sender, RoutedEventArgs e) {
             if (Properties.Settings.Default.TranqPath.Length == 0) {
                 string path = this.getTranqPath();
                 if (path != null && File.Exists(Path.Combine(path, "bin", "Exefile.exe"))) {
@@ -108,17 +109,17 @@ namespace rlel {
                 }
             }
 
-            Thread update_check = new Thread(() => this.updater());
-            update_check.SetApartmentState(ApartmentState.STA);
-            update_check.Start();
+            Thread updateCheck = new Thread(() => this.updater());
+            updateCheck.SetApartmentState(ApartmentState.STA);
+            updateCheck.Start();
             this.evePath.Text = Properties.Settings.Default.TranqPath;
             this.tray = new System.Windows.Forms.NotifyIcon();
             this.tray.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ResourceAssembly.Location);
             this.tray.Text = this.Title;
             this.tray.ContextMenu = new System.Windows.Forms.ContextMenu();
-            this.tray.MouseClick += new System.Windows.Forms.MouseEventHandler(this.tray_Click);
+            this.tray.MouseClick += new System.Windows.Forms.MouseEventHandler(this.trayClick);
             this.contextMenuClick = new EventHandler(this.contextMenu_Click);
-            this.tray.ContextMenu.MenuItems.Add("Exit", this.contextMenu_Click);
+            this.tray.ContextMenu.MenuItems.Add("Exit", this.contextMenuClick);
             this.tray.ContextMenu.MenuItems.Add("Singularity", this.contextMenuClick);
             this.tray.ContextMenu.MenuItems.Add("-");
             if (Properties.Settings.Default.accounts != null) {
@@ -128,7 +129,7 @@ namespace rlel {
             this.popContextMenu();
             this.tray.Visible = true;
             this.checkUpdate = new System.Timers.Timer(3600000); //this is 1 hour, I think
-            this.checkUpdate.Elapsed += new ElapsedEventHandler(checkUpdate_Elapsed);
+            this.checkUpdate.Elapsed += new ElapsedEventHandler(checkUpdateElapsed);
             this.autoUpdate.IsChecked = Properties.Settings.Default.autoPatch;
             if (Properties.Settings.Default.autoPatch) {
                 Thread client = new Thread(() => this.checkClientVersion());
@@ -138,12 +139,12 @@ namespace rlel {
             }
         }
 
-        void checkUpdate_Elapsed(object sender, ElapsedEventArgs e) {
+        void checkUpdateElapsed(object sender, ElapsedEventArgs e) {
             Thread client = new Thread(() => this.checkClientVersion());
             client.Start();
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
+        private void windowClosing(object sender, System.ComponentModel.CancelEventArgs e) {
             this.tray.Visible = false;
         }
 
@@ -173,7 +174,7 @@ namespace rlel {
             return path;
         }
 
-        private void singularity_Click(object sender, RoutedEventArgs e) {
+        private void singularityClick(object sender, RoutedEventArgs e) {
             if (this.singularity.IsChecked == false) {
                 this.evePath.Text = Properties.Settings.Default.TranqPath;
             }
@@ -183,7 +184,7 @@ namespace rlel {
             this.tray.ContextMenu.MenuItems[1].Checked = (bool)this.singularity.IsChecked;
         }
 
-        private void evePath_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) {
+        private void evePathTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) {
             if (this.singularity.IsChecked == true) {
                 Properties.Settings.Default.SisiPath = this.evePath.Text;
                 Properties.Settings.Default.Save();
@@ -197,10 +198,15 @@ namespace rlel {
         private void popAccounts() {
             foreach (string credentials in Properties.Settings.Default.accounts) {
                 Account account = new Account(this);
-                account.show_balloon += new Account.balloon_event(on_balloon_event);
                 string[] split = credentials.Split(new char[] { ':' }, 4);
-                account.username.Text = split[0];
-                account.password.Password = this.decryptPass(rjm, split[1]);
+				if (split.Length < 3) {
+					string user = split[0];
+					string pass = split[1];
+					split = new string[] { "", split[0], split[1] };
+				}
+                account.accountName.Text = split[0];
+                account.username.Text = split[1];
+                account.password.Password = this.decryptPass(rjm, split[2]);
                 this.accountsPanel.Items.Add(account);
                 this.accountsPanel.SelectedItem = this.accountsPanel.Items[0];
             }
@@ -246,7 +252,7 @@ namespace rlel {
             return dstring;
         }
 
-        private void tray_Click(object sender, System.Windows.Forms.MouseEventArgs e) {
+        private void trayClick(object sender, System.Windows.Forms.MouseEventArgs e) {
             if (e.Button == System.Windows.Forms.MouseButtons.Left) {
                 this.Show();
                 this.WindowState = System.Windows.WindowState.Normal;
@@ -265,9 +271,10 @@ namespace rlel {
             else {
                 foreach (Account account in this.accountsPanel.Items) {
                     if (account.username.Text == username) {
-                        new Thread(() => account.launchAccount(
-                            (bool)this.singularity.IsChecked,
-                            Path.Combine(this.evePath.Text, "bin", "exefile.exe"),
+						new Thread(() => account.launchAccount(
+							(bool)this.singularity.IsChecked,
+							Path.Combine(this.evePath.Text, "bin", "exefile.exe"),
+							account.accountName.Text,
                             account.username.Text,
                             account.password.SecurePassword)).Start();
                         break;
@@ -293,7 +300,7 @@ namespace rlel {
         public void updateCredentials() {
             StringCollection accounts = new StringCollection();
             foreach (Account account in this.accountsPanel.Items) {
-                string credentials = String.Format("{0}:{1}", account.username.Text, this.encryptPass(this.rjm, account.password.Password));
+                string credentials = String.Format("{0}:{1}:{2}", account.accountName.Text, account.username.Text, this.encryptPass(this.rjm, account.password.Password));
                 accounts.Add(credentials);
             }
             Properties.Settings.Default.accounts = accounts;
@@ -448,7 +455,7 @@ namespace rlel {
 
         }
 
-        private void autoUpdate_Click(object sender, RoutedEventArgs e) {
+        private void autoUpdateClick(object sender, RoutedEventArgs e) {
             if (autoUpdate.IsChecked == true) {
                 Thread client = new Thread(() => this.checkClientVersion());
                 client.Start();
@@ -461,7 +468,7 @@ namespace rlel {
             Properties.Settings.Default.Save();
         }
 
-        private void accountsPanel_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
+        private void accountsPanelSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
             if (this.accountsPanel.SelectedItem != null) {
                 if (((Account)this.accountsPanel.SelectedItem).username.Text != null)
                     this.user.Text = ((Account)this.accountsPanel.SelectedItem).username.Text;
@@ -470,25 +477,35 @@ namespace rlel {
             }
         }
 
-        private void launch_Click(object sender, RoutedEventArgs e){
+        private void launchClick(object sender, RoutedEventArgs e){
             bool sisi = (bool)this.singularity.IsChecked;
             string path = Path.Combine(this.evePath.Text, "bin", "exefile.exe");
             foreach (Account acct in this.accountsPanel.SelectedItems)
             {
+				string accountName = acct.accountName.Text;
                 string username = acct.username.Text;
                 SecureString password = acct.password.SecurePassword;
-                new Thread(() => acct.launchAccount(sisi, path, username, password)).Start();
+                new Thread(() => acct.launchAccount(sisi, path, accountName, username, password)).Start();
                 Thread.Sleep(100); // there is a better way to fix this but meh for now
             }
         }
 
-        private void settings_upgrade() {
+        private void settingsUpgrade() {
             if (Properties.Settings.Default.upgraded != true) {
                 Properties.Settings.Default.Upgrade();
                 Properties.Settings.Default.upgraded = true;
                 Properties.Settings.Default.Save();
             }
         }
+
+        private Boolean accountStringValid() {
+			foreach(String acct in Properties.Settings.Default.accounts) {
+				if (acct.Split(':').Length < 3)
+					return false;
+			}
+            return true;
+        }
+
 
         private void updater() {
             System.Net.WebClient wc = new System.Net.WebClient();
