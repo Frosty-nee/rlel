@@ -38,12 +38,11 @@ namespace rlel {
             new Thread(()=>this.launchAccount(
                 (bool)this.main.singularity.IsChecked,
                 Path.Combine(this.main.evePath.Text, "bin", "exefile.exe"),
-                (bool)this.main.dx9.IsChecked,
                 this.username.Text,
                 this.password.SecurePassword)).Start();
         }
 
-        public void launchAccount(bool sisi, string path, bool dx, string username, SecureString password ) {
+        public void launchAccount(bool sisi, string path, string username, SecureString password ) {
             string accessToken = this.tranqToken;
             DateTime expire = this.tranqTokenExpiration;
             if (sisi) {
@@ -75,17 +74,15 @@ namespace rlel {
             this.show_balloon(new string[] {"logging in", "launching"}, System.Windows.Forms.ToolTipIcon.None);
             string args;
             string dx9 = "dx11";
-            if (dx)
-                dx9 = "dx9";
             if (sisi) {
-                args = @"/noconsole /ssoToken={0} /triPlatform={1} /server:Singularity";
+                args = @"/noconsole /ssoToken={0} /server:Singularity";
 
             }
             else {
-                args = @"/noconsole /ssoToken={0} /triPlatform={1}";
+                args = @"/noconsole /ssoToken={0}";
             }
             System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo(
-                @".\bin\ExeFile.exe", String.Format(args, ssoToken, dx9)
+                @".\bin\ExeFile.exe", String.Format(args, ssoToken)
             );
             if (sisi) {
                 psi.WorkingDirectory = Properties.Settings.Default.SisiPath;
@@ -102,9 +99,9 @@ namespace rlel {
                 return this.tranqToken;
             if (sisi && sisiToken != null && DateTime.UtcNow < this.sisiTokenExpiration)
                 return this.sisiToken;
-            string uri = "https://login.eveonline.com/Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Flogin.eveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken";
+            string uri = "https://login.eveonline.com/Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Flogin.eveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken%20user";
             if (sisi) {
-                uri = "https://sisilogin.testeveonline.com//Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Fsisilogin.testeveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken";
+                uri = "https://sisilogin.testeveonline.com//Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Fsisilogin.testeveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken%20user";
             }
 
             HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(uri);

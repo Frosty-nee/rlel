@@ -130,7 +130,6 @@ namespace rlel {
             this.checkUpdate = new System.Timers.Timer(3600000); //this is 1 hour, I think
             this.checkUpdate.Elapsed += new ElapsedEventHandler(checkUpdate_Elapsed);
             this.autoUpdate.IsChecked = Properties.Settings.Default.autoPatch;
-            this.dx9.IsChecked = Properties.Settings.Default.dx9;
             if (Properties.Settings.Default.autoPatch) {
                 Thread client = new Thread(() => this.checkClientVersion());
                 client.Start();
@@ -269,7 +268,6 @@ namespace rlel {
                         new Thread(() => account.launchAccount(
                             (bool)this.singularity.IsChecked,
                             Path.Combine(this.evePath.Text, "bin", "exefile.exe"),
-                            (bool)this.dx9.IsChecked,
                             account.username.Text,
                             account.password.SecurePassword)).Start();
                         break;
@@ -454,7 +452,7 @@ namespace rlel {
             if (autoUpdate.IsChecked == true) {
                 Thread client = new Thread(() => this.checkClientVersion());
                 client.Start();
-                this.checkUpdate.Enabled = true;
+                checkUpdate.Enabled = true;
             }
             if (autoUpdate.IsChecked == false) {
                 this.checkUpdate.Enabled = false;
@@ -472,21 +470,16 @@ namespace rlel {
             }
         }
 
-        private void launch_Click(object sender, RoutedEventArgs e) {
+        private void launch_Click(object sender, RoutedEventArgs e){
             bool sisi = (bool)this.singularity.IsChecked;
-            bool dx9 = (bool)this.dx9.IsChecked;
             string path = Path.Combine(this.evePath.Text, "bin", "exefile.exe");
-            foreach (Account acct in this.accountsPanel.SelectedItems) {
+            foreach (Account acct in this.accountsPanel.SelectedItems)
+            {
                 string username = acct.username.Text;
                 SecureString password = acct.password.SecurePassword;
-                new Thread(() => acct.launchAccount(sisi, path, dx9, username, password)).Start();
+                new Thread(() => acct.launchAccount(sisi, path, username, password)).Start();
                 Thread.Sleep(100); // there is a better way to fix this but meh for now
             }
-        }
-
-        private void dx9_Click(object sender, RoutedEventArgs e) {
-            Properties.Settings.Default.dx9 = (bool)this.dx9.IsChecked;
-            Properties.Settings.Default.Save();
         }
 
         private void settings_upgrade() {
