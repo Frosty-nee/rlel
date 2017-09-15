@@ -12,6 +12,8 @@ using System.Threading;
 using System.Management;
 using System.Reflection;
 using System.Security;
+using System.Net;
+
 
 namespace rlel {
     /// <summary>
@@ -37,62 +39,6 @@ namespace rlel {
             this.rjm.Key = Convert.FromBase64String(key);
             this.rjm.IV = Convert.FromBase64String(iv);
         }
-
-        private void onballoonEvent(string[] args, System.Windows.Forms.ToolTipIcon tti) {
-            this.showBalloon(args[0], args[1], tti);
-        }
-
-        private void browseClick(object sender, RoutedEventArgs e) {
-            System.Windows.Forms.FolderBrowserDialog fbd = new System.Windows.Forms.FolderBrowserDialog();
-            fbd.ShowNewFolderButton = false;
-            fbd.SelectedPath = this.evePath.Text;
-            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK) {
-                this.evePath.Text = fbd.SelectedPath;
-            }
-        }
-
-        private void windowStateChanged(object sender, EventArgs e) {
-            this.ShowInTaskbar = (this.WindowState != System.Windows.WindowState.Minimized);
-            if (this.WindowState == System.Windows.WindowState.Minimized) {
-                this.Hide();
-            }
-        }
-
-        private void addAccountClick(object sender, RoutedEventArgs e) {
-            Account acc = new Account(this);
-            acc.showBalloon += new Account.balloonEvent(onballoonEvent);
-            this.accountsPanel.Items.Add(acc);
-            this.accountsPanel.SelectedItem = acc;
-            this.user.Focus();
-            this.user.SelectAll();
-        }
-
-        private void saveClick(object sender, RoutedEventArgs e) {
-            if (this.accountsPanel.SelectedItem == null) {
-                return;
-            }
-			((Account)this.accountsPanel.SelectedItem).accountName.Text = this.accountName.Text;
-            ((Account)this.accountsPanel.SelectedItem).username.Text = this.user.Text;
-            ((Account)this.accountsPanel.SelectedItem).password.Password = this.pass.Password;
-            this.updateCredentials();
-            this.accountsPanel.Items.Refresh();
-        }
-
-        private void removeClick(object sender, RoutedEventArgs e) {
-            List<Account> acl = new List<Account>();
-            foreach (Account a in this.accountsPanel.SelectedItems) {
-                acl.Add(a);
-            }
-            foreach (Account acct in acl) {
-                this.accountsPanel.Items.Remove(acct);
-                acct.showBalloon -= new Account.balloonEvent(onballoonEvent);
-            }
-            this.updateCredentials();
-            if (this.accountsPanel.Items.Count > 0) {
-                this.accountsPanel.SelectedItem = this.accountsPanel.Items[0];
-            }
-        }
-
 
         private void windowLoaded(object sender, RoutedEventArgs e) {
             if (Properties.Settings.Default.TranqPath.Length == 0) {
@@ -128,7 +74,7 @@ namespace rlel {
             this.tray.ContextMenu.MenuItems.Add("-");
             this.popContextMenu();
             this.tray.Visible = true;
-            this.checkUpdate = new System.Timers.Timer(3600000); //this is 1 hour, I think
+            this.checkUpdate = new System.Timers.Timer(3600000); 
             this.checkUpdate.Elapsed += new ElapsedEventHandler(checkUpdateElapsed);
             this.autoUpdate.IsChecked = Properties.Settings.Default.autoPatch;
             if (Properties.Settings.Default.autoPatch) {
@@ -138,13 +84,71 @@ namespace rlel {
                 this.checkUpdate.Enabled = true;
             }
         }
+        private void onballoonEvent(string[] args, System.Windows.Forms.ToolTipIcon tti) {
+            this.showBalloon(args[0], args[1], tti);
+        }
+
+        private void browseClick(object sender, RoutedEventArgs e) {
+            System.Windows.Forms.FolderBrowserDialog fbd = new System.Windows.Forms.FolderBrowserDialog();
+            fbd.ShowNewFolderButton = false;
+            fbd.SelectedPath = this.evePath.Text;
+            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK) {
+                this.evePath.Text = fbd.SelectedPath;
+            }
+        }
+
+        private void windowStateChanged(object sender, EventArgs e) {
+            this.ShowInTaskbar = (this.WindowState != System.Windows.WindowState.Minimized);
+            if (this.WindowState == System.Windows.WindowState.Minimized) {
+                this.Hide();
+            }
+        }
+
+        private void addAccountClick(object sender, RoutedEventArgs e) {
+            Account acc = new Account(this);
+            acc.showBalloon += (onballoonEvent);
+            this.accountsPanel.Items.Add(acc);
+            this.accountsPanel.SelectedItem = acc;
+            this.user.Focus();
+            this.user.SelectAll();
+        }
+
+        private void saveClick(object sender, RoutedEventArgs e) {
+            if (this.accountsPanel.SelectedItem == null) {
+                return;
+            }
+			((Account)this.accountsPanel.SelectedItem).accountName.Text = this.accountName.Text;
+            ((Account)this.accountsPanel.SelectedItem).username.Text = this.user.Text;
+            ((Account)this.accountsPanel.SelectedItem).password.Password = this.pass.Password;
+            this.updateCredentials();
+            this.accountsPanel.Items.Refresh();
+        }
+
+        private void removeClick(object sender, RoutedEventArgs e) {
+            List<Account> acl = new List<Account>();
+            foreach (Account a in this.accountsPanel.SelectedItems) {
+                acl.Add(a);
+            }
+            foreach (Account acct in acl) {
+                this.accountsPanel.Items.Remove(acct);
+                acct.showBalloon -= new Account.balloonEvent(onballoonEvent);
+            }
+            this.updateCredentials();
+            if (this.accountsPanel.Items.Count > 0) {
+                this.accountsPanel.SelectedItem = this.accountsPanel.Items[0];
+            }
+        }
+
+
+
 
         void checkUpdateElapsed(object sender, ElapsedEventArgs e) {
             Thread client = new Thread(() => this.checkClientVersion());
             client.Start();
         }
 
-        private void windowClosing(object sender, System.ComponentModel.CancelEventArgs e) {
+        private void windowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
             this.tray.Visible = false;
         }
 
@@ -259,27 +263,17 @@ namespace rlel {
             }
         }
 
-        private void contextMenu_Click(object sender, EventArgs e) {
+        private void contextMenu_Click(object sender, EventArgs e)
+        {
             string username = ((System.Windows.Forms.MenuItem)sender).Text;
-            if (username == "Singularity") {
+            if (username == "Singularity")
+            {
                 this.singularity.IsChecked = !this.singularity.IsChecked;
                 ((System.Windows.Forms.MenuItem)sender).Checked = (bool)this.singularity.IsChecked;
             }
-            if (username == "Exit") {
+            if (username == "Exit")
+            {
                 this.Close();
-            }
-            else {
-                foreach (Account account in this.accountsPanel.Items) {
-                    if (account.username.Text == username) {
-						new Thread(() => account.launchAccount(
-							(bool)this.singularity.IsChecked,
-							Path.Combine(this.evePath.Text, "bin", "exefile.exe"),
-							account.accountName.Text,
-                            account.username.Text,
-                            account.password.SecurePassword)).Start();
-                        break;
-                    }
-                }
             }
         }
 
@@ -474,20 +468,189 @@ namespace rlel {
                     this.user.Text = ((Account)this.accountsPanel.SelectedItem).username.Text;
                 if (((Account)this.accountsPanel.SelectedItem).password.Password != null)
                     this.pass.Password = ((Account)this.accountsPanel.SelectedItem).password.Password;
+                if (((Account)this.accountsPanel.SelectedItem).accountName.Text != null)
+                    this.accountName.Text = ((Account)this.accountsPanel.SelectedItem).accountName.Text;
             }
         }
 
-        private void launchClick(object sender, RoutedEventArgs e){
-            bool sisi = (bool)this.singularity.IsChecked;
+        private void LaunchClick(object sender, RoutedEventArgs e){
             string path = Path.Combine(this.evePath.Text, "bin", "exefile.exe");
             foreach (Account acct in this.accountsPanel.SelectedItems)
             {
-				string accountName = acct.accountName.Text;
-                string username = acct.username.Text;
-                SecureString password = acct.password.SecurePassword;
-                new Thread(() => acct.launchAccount(sisi, path, accountName, username, password)).Start();
+                this.LaunchAccount((bool)this.singularity.IsChecked, path, acct);
                 Thread.Sleep(100); // there is a better way to fix this but meh for now
             }
+        }
+
+        private void LaunchAccount(bool sisi, string path, Account acct)
+        {
+            this.onballoonEvent(new string[] { "test", "this" }, System.Windows.Forms.ToolTipIcon.Info);
+            
+            string accessToken = acct.tranqToken;
+            DateTime expire = acct.tranqTokenExpiration;
+            if (sisi)
+            {
+                accessToken = acct.sisiToken;
+                expire = acct.sisiTokenExpiration;
+            }
+            if (!File.Exists(path))
+            {
+                this.showBalloon("eve path", "could not find" + path, System.Windows.Forms.ToolTipIcon.Error);
+                return;
+            }
+            else if (acct.username.Text.Length == 0 || acct.password.Password.Length == 0)
+            {
+                this.showBalloon("logging in", "missing username or password", System.Windows.Forms.ToolTipIcon.Error);
+                return;
+            }
+            this.showBalloon("logging in", acct.accountName.Text, System.Windows.Forms.ToolTipIcon.None);
+            string ssoToken = null;
+            try
+            {
+                ssoToken = this.getSSOToken(acct, sisi);
+            }
+            catch (WebException e)
+            {
+                accessToken = null;
+                this.showBalloon("logging in", e.Message, System.Windows.Forms.ToolTipIcon.Error);
+                return;
+            }
+            if (ssoToken == null)
+            {
+                this.showBalloon("logging in", "invalid username/password" , System.Windows.Forms.ToolTipIcon.Error);
+                return;
+            }
+            this.showBalloon("logging in", "launching" , System.Windows.Forms.ToolTipIcon.None);
+            string args;
+            if (sisi)
+            {
+                args = @"/noconsole /ssoToken={0} /server:Singularity";
+
+            }
+            else
+            {
+                args = @"/noconsole /ssoToken={0}";
+            }
+            System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo(
+                @".\bin\ExeFile.exe", String.Format(args, ssoToken)
+            );
+            if (sisi)
+            {
+                psi.WorkingDirectory = Properties.Settings.Default.SisiPath;
+            }
+            else
+            {
+                psi.WorkingDirectory = Properties.Settings.Default.TranqPath;
+            }
+            System.Diagnostics.Process.Start(psi);
+            return;
+        }
+
+        private string getSSOToken(Account acct, bool sisi)
+        {
+            string accessToken = this.GetAccessToken(acct, sisi);
+            string uri = "https://login.eveonline.com/launcher/token?accesstoken=" + accessToken;
+            if (accessToken == null)
+                return null;
+            if (sisi)
+            {
+                uri = "https://sisilogin.testeveonline.com/launcher/token?accesstoken=" + accessToken;
+            }
+            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(uri);
+            req.Timeout = 5000;
+            req.AllowAutoRedirect = false;
+            HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
+            string ssoToken = this.ExtractAccessToken(resp.GetResponseHeader("Location"));
+            resp.Close();
+            return ssoToken;
+        }
+
+        private string ExtractAccessToken(string urlFragment)
+        {
+            const string search = "#access_token=";
+            int start = urlFragment.IndexOf(search);
+            if (start == -1)
+                return null;
+            start += search.Length;
+            string accessToken = urlFragment.Substring(start, urlFragment.IndexOf('&') - start);
+            return accessToken;
+        }
+
+            private string GetAccessToken(Account acct, bool sisi)
+        {
+            if (!sisi && acct.tranqToken != null && DateTime.UtcNow < acct.tranqTokenExpiration)
+                return acct.tranqToken;
+            if (sisi && acct.sisiToken != null && DateTime.UtcNow < acct.sisiTokenExpiration)
+                return acct.sisiToken;
+            string uri = "https://login.eveonline.com/Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Flogin.eveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken%20user";
+            if (sisi)
+            {
+                uri = "https://sisilogin.testeveonline.com//Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Fsisilogin.testeveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken%20user";
+            }
+
+            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(uri);
+            req.Timeout = 5000;
+            req.AllowAutoRedirect = true;
+            if (!sisi)
+            {
+                req.Headers.Add("Origin", "https://login.eveonline.com");
+            }
+            else
+            {
+                req.Headers.Add("Origin", "https://sisilogin.testeveonline.com");
+            }
+            req.Referer = uri;
+            req.CookieContainer = new CookieContainer(8);
+            CookieContainer cook = req.CookieContainer;
+            req.Method = "POST";
+            req.ContentType = "application/x-www-form-urlencoded";
+            byte[] body = Encoding.ASCII.GetBytes(String.Format("UserName={0}&Password={1}", Uri.EscapeDataString(acct.username.Text), Uri.EscapeDataString(acct.password.Password)));
+            req.ContentLength = body.Length;
+            Stream reqStream = req.GetRequestStream();
+            reqStream.Write(body, 0, body.Length);
+            reqStream.Close();
+            HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
+
+            if (resp.ResponseUri.Fragment.Length == 0) {
+                resp.Close();
+                Authenticator auth = new Authenticator();
+                auth.ShowDialog();
+                auth.authCode.Focus();
+                uri = "https://login.eveonline.com/account/authenticator?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Flogin.eveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken%20user";
+                req = (HttpWebRequest)HttpWebRequest.Create(uri);
+                req.Referer = "https://login.eveonline.com/Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Flogin.eveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken%20user";
+                req.Timeout = 5000;
+                req.AllowAutoRedirect = true;
+                if (!sisi)
+                    req.Headers.Add("Origin", "https://login.eveonline.com");
+                req.Referer = uri;
+                req.CookieContainer = cook;
+                req.Method = "POST";
+                req.ContentType = "application/x-www-form-urlencoded";
+                body = Encoding.ASCII.GetBytes(String.Format("Challenge={0}&RememberTwoFactor={1}&command=Continue", Uri.EscapeDataString(auth.authCode.Text), Uri.EscapeDataString(auth.DontAsk.IsChecked.ToString())));
+                req.ContentLength = body.Length;
+                reqStream = req.GetRequestStream();
+                reqStream.Write(body, 0, body.Length);
+                reqStream.Close();
+                resp = (HttpWebResponse)req.GetResponse();
+                Console.Write("RESPONSE: ");
+                Console.WriteLine(resp.ResponseUri.Fragment);
+            }
+            // https://login.eveonline.com/launcher?client_id=eveLauncherTQ#access_token=...&token_type=Bearer&expires_in=43200
+            string accessToken = this.ExtractAccessToken(resp.ResponseUri.Fragment);
+            resp.Close(); // WTF.NET http://stackoverflow.com/questions/11712232/ and http://stackoverflow.com/questions/1500955/
+            if (!sisi)
+            {
+                acct.tranqToken = accessToken;
+                acct.tranqTokenExpiration = DateTime.UtcNow + TimeSpan.FromHours(11);
+            }
+            else
+            {
+                acct.sisiToken = accessToken;
+                acct.sisiTokenExpiration = DateTime.UtcNow + TimeSpan.FromHours(11);
+            }
+
+            return accessToken;
         }
 
         private void settingsUpgrade() {
@@ -524,6 +687,11 @@ namespace rlel {
                 update u = new update();
                 u.ShowDialog();
             }
+        }
+
+        private void accountsPanel_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            
         }
     }
 }
