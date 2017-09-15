@@ -106,7 +106,6 @@ namespace rlel {
 
         private void addAccountClick(object sender, RoutedEventArgs e) {
             Account acc = new Account(this);
-            acc.showBalloon += (onballoonEvent);
             this.accountsPanel.Items.Add(acc);
             this.accountsPanel.SelectedItem = acc;
             this.user.Focus();
@@ -131,16 +130,12 @@ namespace rlel {
             }
             foreach (Account acct in acl) {
                 this.accountsPanel.Items.Remove(acct);
-                acct.showBalloon -= new Account.balloonEvent(onballoonEvent);
             }
             this.updateCredentials();
             if (this.accountsPanel.Items.Count > 0) {
                 this.accountsPanel.SelectedItem = this.accountsPanel.Items[0];
             }
         }
-
-
-
 
         void checkUpdateElapsed(object sender, ElapsedEventArgs e) {
             Thread client = new Thread(() => this.checkClientVersion());
@@ -274,6 +269,14 @@ namespace rlel {
             if (username == "Exit")
             {
                 this.Close();
+            }
+            else
+            {
+                string path = Path.Combine(this.evePath.Text, "bin", "exefile.exe");
+                foreach (Account acct in this.accountsPanel.Items) {
+                    if (acct.username.Text == username)
+                        this.LaunchAccount((bool)this.singularity.IsChecked, path, acct);
+                }
             }
         }
 
@@ -633,8 +636,6 @@ namespace rlel {
                 reqStream.Write(body, 0, body.Length);
                 reqStream.Close();
                 resp = (HttpWebResponse)req.GetResponse();
-                Console.Write("RESPONSE: ");
-                Console.WriteLine(resp.ResponseUri.Fragment);
             }
             // https://login.eveonline.com/launcher?client_id=eveLauncherTQ#access_token=...&token_type=Bearer&expires_in=43200
             string accessToken = this.ExtractAccessToken(resp.ResponseUri.Fragment);

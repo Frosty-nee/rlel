@@ -15,7 +15,7 @@ namespace rlel {
     /// </summary>
     public partial class Account : UserControl {
         public delegate void balloonEvent(string[] args, System.Windows.Forms.ToolTipIcon tti);
-		public event balloonEvent showBalloon;
+		
 		MainWindow main;
         public string tranqToken;
         public string sisiToken;
@@ -29,11 +29,5 @@ namespace rlel {
             this.main = main;
 
         }
-
-        private void removeClick(object sender, RoutedEventArgs e) {
-            this.main.accountsPanel.Items.Remove(this);
-            this.main.updateCredentials();
-        }
-
     }
 }
