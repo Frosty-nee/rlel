@@ -1,0 +1,14 @@
+﻿<Window x:Class="rlel.SettingsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:rlel"
+        mc:Ignorable="d"
+        Title="SettingsDialog" Height="300" Width="300" ResizeMode="NoResize">
+    <Grid>
+        <ListBox Name="SettingsDirectories" Height="200" Width="250" Margin="19,59,23,10" ></ListBox>
+        <Button Name="Submit" Content="Submit" Height="30" Width="60" Margin="209,24,23,215" Click="Submit_Click"></Button>
+        <TextBlock Text="Select a settings profile to use" Height="20" Width="175" Margin="20,25,99,216"></TextBlock>
+    </Grid>
+</Window>

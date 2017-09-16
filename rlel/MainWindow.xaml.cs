@@ -13,7 +13,7 @@ using System.Management;
 using System.Reflection;
 using System.Security;
 using System.Net;
-
+using System.Linq;
 
 namespace rlel {
     /// <summary>
@@ -116,7 +116,6 @@ namespace rlel {
             if (this.accountsPanel.SelectedItem == null) {
                 return;
             }
-			((Account)this.accountsPanel.SelectedItem).accountName.Text = this.accountName.Text;
             ((Account)this.accountsPanel.SelectedItem).username.Text = this.user.Text;
             ((Account)this.accountsPanel.SelectedItem).password.Password = this.pass.Password;
             this.updateCredentials();
@@ -197,15 +196,15 @@ namespace rlel {
         private void popAccounts() {
             foreach (string credentials in Properties.Settings.Default.accounts) {
                 Account account = new Account(this);
-                string[] split = credentials.Split(new char[] { ':' }, 4);
+                string[] split = credentials.Split(new char[] { ':' }, 3);
 				if (split.Length < 3) {
 					string user = split[0];
 					string pass = split[1];
-					split = new string[] { "", split[0], split[1] };
+					split = new string[] {split[0], split[1], "" };
 				}
-                account.accountName.Text = split[0];
-                account.username.Text = split[1];
-                account.password.Password = this.decryptPass(rjm, split[2]);
+                account.SettingsDir = split[2];
+                account.username.Text = split[0];
+                account.password.Password = this.decryptPass(rjm, split[1]);
                 this.accountsPanel.Items.Add(account);
                 this.accountsPanel.SelectedItem = this.accountsPanel.Items[0];
             }
@@ -297,7 +296,7 @@ namespace rlel {
         public void updateCredentials() {
             StringCollection accounts = new StringCollection();
             foreach (Account account in this.accountsPanel.Items) {
-                string credentials = String.Format("{0}:{1}:{2}", account.accountName.Text, account.username.Text, this.encryptPass(this.rjm, account.password.Password));
+                string credentials = String.Format("{0}:{1}:{2}", account.username.Text, this.encryptPass(this.rjm, account.password.Password), account.SettingsDir);
                 accounts.Add(credentials);
             }
             Properties.Settings.Default.accounts = accounts;
@@ -471,9 +470,33 @@ namespace rlel {
                     this.user.Text = ((Account)this.accountsPanel.SelectedItem).username.Text;
                 if (((Account)this.accountsPanel.SelectedItem).password.Password != null)
                     this.pass.Password = ((Account)this.accountsPanel.SelectedItem).password.Password;
-                if (((Account)this.accountsPanel.SelectedItem).accountName.Text != null)
-                    this.accountName.Text = ((Account)this.accountsPanel.SelectedItem).accountName.Text;
             }
+        }
+
+        private void SetEveSettingsProfiles(Account acct)
+        {
+            string appdata = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string mainSettingsDir = Directory.EnumerateDirectories(Path.Combine(appdata, "CCP", "EVE"), "*_tranquility").First<string>();
+        
+            IEnumerable<string> dirs = Directory.EnumerateDirectories(mainSettingsDir, "settings_*");
+            if (dirs.Count() > 1 ) 
+            {
+                SettingsDialog sd = new SettingsDialog();
+                foreach (string setdir in dirs)
+                {
+                    string[] split = setdir.Split('\\');
+                    string shortname = split.Last().Split('_').Last();
+                    sd.SettingsDirectories.Items.Add(shortname);
+
+                }
+                    sd.ShowDialog();
+                    acct.SettingsDir = (string)sd.SettingsDirectories.SelectedItem;
+            }
+            else
+            {
+                acct.SettingsDir = dirs.First<string>();
+            }
+            this.updateCredentials();
         }
 
         private void LaunchClick(object sender, RoutedEventArgs e){
@@ -487,8 +510,12 @@ namespace rlel {
 
         private void LaunchAccount(bool sisi, string path, Account acct)
         {
-            this.onballoonEvent(new string[] { "test", "this" }, System.Windows.Forms.ToolTipIcon.Info);
-            
+            this.showBalloon("Launching...", acct.username.Text,  System.Windows.Forms.ToolTipIcon.Info);
+            if (acct.SettingsDir == "")
+            {
+                this.SetEveSettingsProfiles(acct);
+            }
+
             string accessToken = acct.tranqToken;
             DateTime expire = acct.tranqTokenExpiration;
             if (sisi)
@@ -506,7 +533,7 @@ namespace rlel {
                 this.showBalloon("logging in", "missing username or password", System.Windows.Forms.ToolTipIcon.Error);
                 return;
             }
-            this.showBalloon("logging in", acct.accountName.Text, System.Windows.Forms.ToolTipIcon.None);
+            this.showBalloon("logging in", acct.username.Text, System.Windows.Forms.ToolTipIcon.None);
             string ssoToken = null;
             try
             {
@@ -527,15 +554,15 @@ namespace rlel {
             string args;
             if (sisi)
             {
-                args = @"/noconsole /ssoToken={0} /server:Singularity";
+                args = @"/noconsole /ssoToken={0} /settingsprofile={1} /server:Singularity";
 
             }
             else
             {
-                args = @"/noconsole /ssoToken={0}";
+                args = @"/noconsole /ssoToken={0} /settingsprofile={1}";
             }
             System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo(
-                @".\bin\ExeFile.exe", String.Format(args, ssoToken)
+                @".\bin\ExeFile.exe", String.Format(args, ssoToken, acct.SettingsDir)
             );
             if (sisi)
             {
@@ -690,9 +717,11 @@ namespace rlel {
             }
         }
 
-        private void accountsPanel_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void SettingsProf_Click(object sender, RoutedEventArgs e)
         {
             
+            Account acct = (Account)this.accountsPanel.SelectedItem;
+            this.SetEveSettingsProfiles(acct);
         }
     }
 }

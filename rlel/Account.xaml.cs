@@ -21,7 +21,7 @@ namespace rlel {
         public string sisiToken;
         public DateTime tranqTokenExpiration;
         public DateTime sisiTokenExpiration;
-        public string SettingsFile;
+        public string SettingsDir;
 
 
         public Account(MainWindow main) {

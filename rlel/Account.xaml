@@ -5,8 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" Height="20" Width="250" >
     <Grid>
-        <TextBlock Name="accountName" Width="250" VerticalAlignment="Center" Height="18" />
-        <TextBlock Name="username" Width="250" VerticalAlignment="Center" Height="18" Visibility="Hidden" />
+        <TextBlock Name="accountName" Width="250" VerticalAlignment="Center" Height="18"/>
+        <TextBlock Name="username" Width="250" VerticalAlignment="Center" Height="18" Visibility="Visible" />
         <PasswordBox Name="password" Password="" Visibility="Hidden" Margin="138,-1,162,1" />
     </Grid>
 </UserControl>
