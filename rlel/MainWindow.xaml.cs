@@ -123,11 +123,6 @@ namespace rlel {
             }
         }
 
-        void checkUpdateElapsed(object sender, ElapsedEventArgs e) {
-            Thread client = new Thread(() => this.checkClientVersion());
-            client.Start();
-        }
-
         private void windowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             this.tray.Visible = false;
@@ -404,22 +399,25 @@ namespace rlel {
             string mainSettingsDir = Directory.EnumerateDirectories(Path.Combine(appdata, "CCP", "EVE"), "*_tranquility").First<string>();
         
             IEnumerable<string> dirs = Directory.EnumerateDirectories(mainSettingsDir, "settings_*");
+
+            SettingsDialog sd = new SettingsDialog();
+            foreach (string setdir in dirs)
+            {
+                string[] split = setdir.Split('\\');
+                string shortname = split.Last().Split('_').Last();
+                sd.SettingsDirectories.Items.Add(shortname);
+
+            }
             if (dirs.Count() > 1 ) 
             {
-                SettingsDialog sd = new SettingsDialog();
-                foreach (string setdir in dirs)
-                {
-                    string[] split = setdir.Split('\\');
-                    string shortname = split.Last().Split('_').Last();
-                    sd.SettingsDirectories.Items.Add(shortname);
 
-                }
-                    sd.ShowDialog();
-                    acct.SettingsDir = (string)sd.SettingsDirectories.SelectedItem;
+                sd.Focus();
+                sd.ShowDialog();
+                acct.SettingsDir = (string)sd.SettingsDirectories.SelectedItem;
             }
             else
             {
-                acct.SettingsDir = dirs.First<string>();
+                acct.SettingsDir = (string)sd.SettingsDirectories.Items[0];
             }
             this.updateCredentials();
         }
@@ -617,7 +615,6 @@ namespace rlel {
 
         private void SettingsProf_Click(object sender, RoutedEventArgs e)
         {
-            
             Account acct = (Account)this.accountsPanel.SelectedItem;
             this.SetEveSettingsProfiles(acct);
         }
