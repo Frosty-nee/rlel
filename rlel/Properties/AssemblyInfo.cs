@@ -7,8 +7,8 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("rlel")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Rapid Light EVE Launcher")]
+[assembly: AssemblyDescription("A lightweight 3rd party launcher for EVE Online")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("rlel")]
