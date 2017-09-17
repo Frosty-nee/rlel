@@ -25,8 +25,6 @@ namespace rlel {
         int tranqVersion;
         int sisiVersion;
         EventHandler contextMenuClick;
-        DateTime updateCheckExpire = new DateTime();
-        System.Timers.Timer checkUpdate;
         RijndaelManaged rjm = new RijndaelManaged();
         Thread tqpatching;
         Thread sisipatching;
@@ -55,9 +53,7 @@ namespace rlel {
                 }
             }
 
-            Thread updateCheck = new Thread(() => this.updater());
-            updateCheck.SetApartmentState(ApartmentState.STA);
-            updateCheck.Start();
+;
             this.evePath.Text = Properties.Settings.Default.TranqPath;
             this.tray = new System.Windows.Forms.NotifyIcon();
             this.tray.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ResourceAssembly.Location);
@@ -74,15 +70,6 @@ namespace rlel {
             this.tray.ContextMenu.MenuItems.Add("-");
             this.popContextMenu();
             this.tray.Visible = true;
-            this.checkUpdate = new System.Timers.Timer(3600000); 
-            this.checkUpdate.Elapsed += new ElapsedEventHandler(checkUpdateElapsed);
-            this.autoUpdate.IsChecked = Properties.Settings.Default.autoPatch;
-            if (Properties.Settings.Default.autoPatch) {
-                Thread client = new Thread(() => this.checkClientVersion());
-                client.Start();
-
-                this.checkUpdate.Enabled = true;
-            }
         }
         private void onballoonEvent(string[] args, System.Windows.Forms.ToolTipIcon tti) {
             this.showBalloon(args[0], args[1], tti);
@@ -304,55 +291,6 @@ namespace rlel {
             this.popContextMenu();
         }
 
-        private void updateEveVersion() {
-            if (DateTime.UtcNow > this.updateCheckExpire) {
-                System.Net.WebClient wc = new System.Net.WebClient();
-                string ds;
-                try {
-                    ds = wc.DownloadString(new Uri("http://client.eveonline.com/patches/premium_patchinfoTQ_inc.txt"));
-                }
-                catch {
-                    return;
-                }
-                this.tranqVersion = Convert.ToInt32(ds.Substring(6, 6));
-
-                try {
-                    ds = wc.DownloadString(new Uri("http://client.eveonline.com/patches/premium_patchinfoSISI_inc.txt"));
-                }
-                catch {
-                    return;
-                }
-                this.sisiVersion = Convert.ToInt32(ds.Substring(6, 6));
-                this.updateCheckExpire = (DateTime.UtcNow + TimeSpan.FromHours(1));
-                wc.Dispose();
-            }
-        }
-
-        private void checkClientVersion() {
-            this.updateEveVersion();
-            StreamReader sr;
-            int clientVers;
-            if (this.checkFilePaths(Properties.Settings.Default.TranqPath)) {
-                sr = new StreamReader(String.Format("{0}\\{1}", Properties.Settings.Default.TranqPath, "start.ini"));
-                sr.ReadLine(); sr.ReadLine();
-
-                clientVers = Convert.ToInt32(sr.ReadLine().Substring(8));
-                if (this.tranqVersion != clientVers) {
-                    this.patch(Properties.Settings.Default.TranqPath, false);
-                }
-                sr.Close();
-            }
-            if (this.checkFilePaths(Properties.Settings.Default.SisiPath)) {
-                sr = new StreamReader(String.Format("{0}\\{1}", Properties.Settings.Default.SisiPath, "start.ini"));
-                sr.ReadLine(); sr.ReadLine();
-                clientVers = Convert.ToInt32(sr.ReadLine().Substring(8));
-                if (this.sisiVersion != clientVers) {
-                    this.patch(Properties.Settings.Default.SisiPath, true);
-                }
-                sr.Close();
-            }
-        }
-
         private bool checkFilePaths(string path) {
             string exeFilePath;
             exeFilePath = Path.Combine(path, "bin", "ExeFile.exe");
@@ -449,19 +387,6 @@ namespace rlel {
             children.AddRange(grandchildren);
             return children;
 
-        }
-
-        private void autoUpdateClick(object sender, RoutedEventArgs e) {
-            if (autoUpdate.IsChecked == true) {
-                Thread client = new Thread(() => this.checkClientVersion());
-                client.Start();
-                checkUpdate.Enabled = true;
-            }
-            if (autoUpdate.IsChecked == false) {
-                this.checkUpdate.Enabled = false;
-            }
-            Properties.Settings.Default.autoPatch = (bool)autoUpdate.IsChecked;
-            Properties.Settings.Default.Save();
         }
 
         private void accountsPanelSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
@@ -606,7 +531,7 @@ namespace rlel {
             return accessToken;
         }
 
-            private string GetAccessToken(Account acct, bool sisi)
+        private string GetAccessToken(Account acct, bool sisi)
         {
             if (!sisi && acct.tranqToken != null && DateTime.UtcNow < acct.tranqTokenExpiration)
                 return acct.tranqToken;
@@ -680,7 +605,8 @@ namespace rlel {
 
             return accessToken;
         }
-
+        
+        //upgrades settings file from older versions of rlel to new version
         private void settingsUpgrade() {
             if (Properties.Settings.Default.upgraded != true) {
                 Properties.Settings.Default.Upgrade();
@@ -689,39 +615,19 @@ namespace rlel {
             }
         }
 
-        private Boolean accountStringValid() {
-			foreach(String acct in Properties.Settings.Default.accounts) {
-				if (acct.Split(':').Length < 3)
-					return false;
-			}
-            return true;
-        }
-
-
-        private void updater() {
-            System.Net.WebClient wc = new System.Net.WebClient();
-            string str = "";
-            try {
-                str = wc.DownloadString(new Uri("http://rlel.frosty-nee.net/VERSION"));
-            }
-            catch {
-                this.showBalloon("Error", "rlel version checking timed out", System.Windows.Forms.ToolTipIcon.Error);
-                return;
-            }
-            String[] splat = str.Split(new String[] { "\r\n", " " }, StringSplitOptions.RemoveEmptyEntries);
-            Version localversion = Version.Parse(Assembly.GetExecutingAssembly().GetName().Version.ToString());
-            Version remoteversion = Version.Parse(splat[1].ToString());
-            if (localversion < remoteversion) {
-                update u = new update();
-                u.ShowDialog();
-            }
-        }
-
         private void SettingsProf_Click(object sender, RoutedEventArgs e)
         {
             
             Account acct = (Account)this.accountsPanel.SelectedItem;
             this.SetEveSettingsProfiles(acct);
+        }
+        //save credentials when return is pressed in either input box
+        private void user_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if( e.Key == System.Windows.Input.Key.Enter)
+            {
+                this.saveClick(this, e);
+            }
         }
     }
 }

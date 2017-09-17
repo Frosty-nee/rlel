@@ -3,13 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Rapid Light EVE Launcher" ResizeMode="CanMinimize" Icon="/rlel;component/rlel.ico" Loaded="windowLoaded" Closing="windowClosing" WindowStartupLocation="CenterScreen" StateChanged="windowStateChanged" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" Height="383" Width="425">
     <Grid>
-        <CheckBox Name="autoUpdate" Content="Patch EVE automatically" Click="autoUpdateClick" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="12,41,0,0" />
-        <Button Name="SettingsProf" Content="Settings" Height="23" Width="90" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,212,16,0" Click="SettingsProf_Click"  ></Button>
+        <CheckBox Name="autoUpdate" Content="Patch EVE automatically" Click="autoUpdateClick" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Hidden" Margin="12,41,0,0" />
+        <Button Name="SettingsProf" Content="Client Settings" Height="23" Width="90" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,212,16,0" Click="SettingsProf_Click"  ></Button>
         <TextBox Name="evePath" Height="23" Width="220" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="12,12,0,0" TextChanged="evePathTextChanged" />
         <CheckBox Name="singularity" Content="Singularity" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="242,15,0,0" Click="singularityClick" />
         <Button Content="Browse" Name="browse" Click="browseClick" HorizontalAlignment="left" VerticalAlignment="Top" Height="23" Width="70" Margin="333,11,0,0" />
-        <TextBox Name="user" Height="23" Width="145" HorizontalAlignment="Left" VerticalAlignment="top" Margin="12,69,0,0" />
-        <PasswordBox Name="pass" Height="23" Width="145" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="162,69,0,0"  />
+        <TextBox Name="user" Height="23" Width="145" HorizontalAlignment="Left" VerticalAlignment="top" Margin="12,69,0,0" KeyDown="user_KeyDown" />
+        <PasswordBox Name="pass" Height="23" Width="145" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="162,69,0,0" KeyDown="user_KeyDown"  />
         <Button Name="save" Content="Save" HorizontalAlignment="Left" VerticalAlignment="Top" Click="saveClick" Height="23" Width="90" Margin="313,97,0,0" />
         <Button Name="addAccount" Content="Add Account" Click="addAccountClick" Height="23" Width="90" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="313,155,0,0" />
         <Button Name="remove" Content="Remove" Click="removeClick" Height="23" Width="90" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="313,184,0,0" />
