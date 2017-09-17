@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rlel", "rlel.csproj", "{7D678583-E48B-46C3-A1F1-F2EEEA8183FA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7E58CE30-EC6F-47E6-80A1-E2F4CB8B50E8}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Rapid Light EVE Launcher", "Rapid Light EVE Launcher\Rapid Light EVE Launcher.vdproj", "{0B5FD362-F5EB-4466-8ACC-C7BBF452BDCA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,8 +19,14 @@ Global
 		{7D678583-E48B-46C3-A1F1-F2EEEA8183FA}.Debug|x86.Build.0 = Debug|x86
 		{7D678583-E48B-46C3-A1F1-F2EEEA8183FA}.Release|x86.ActiveCfg = Release|x86
 		{7D678583-E48B-46C3-A1F1-F2EEEA8183FA}.Release|x86.Build.0 = Release|x86
+		{0B5FD362-F5EB-4466-8ACC-C7BBF452BDCA}.Debug|x86.ActiveCfg = Debug
+		{0B5FD362-F5EB-4466-8ACC-C7BBF452BDCA}.Debug|x86.Build.0 = Debug
+		{0B5FD362-F5EB-4466-8ACC-C7BBF452BDCA}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EC7B80B0-8137-4827-A42C-7DA8C72560CB}
 	EndGlobalSection
 EndGlobal
