@@ -18,12 +18,18 @@ namespace rlel
     /// </summary>
     public partial class SettingsDialog : Window
     {
-        public SettingsDialog()
+        public SettingsDialog(Account acct)
         {
             InitializeComponent();
+            this.accountName.Text = acct.username.Text;
         }
 
         private void Submit_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void SettingsDirectories_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             this.Close();
         }

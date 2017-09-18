@@ -473,7 +473,7 @@ namespace rlel {
 
             IEnumerable<string> dirs = Directory.EnumerateDirectories(mainSettingsDir, "settings_*");
 
-            SettingsDialog sd = new SettingsDialog();
+            SettingsDialog sd = new SettingsDialog(acct);
             foreach (string setdir in dirs)
             {
                 string[] split = setdir.Split('\\');
