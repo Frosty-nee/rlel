@@ -14,12 +14,14 @@ using System.Reflection;
 using System.Security;
 using System.Net;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace rlel {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window {
+    public partial class MainWindow : Window
+    {
 
         System.Windows.Forms.NotifyIcon tray;
         int tranqVersion;
@@ -29,7 +31,8 @@ namespace rlel {
         Thread tqpatching;
         Thread sisipatching;
 
-        public MainWindow() {
+        public MainWindow()
+        {
             this.settingsUpgrade();
             InitializeComponent();
             string key = this.getKey();
@@ -38,16 +41,20 @@ namespace rlel {
             this.rjm.IV = Convert.FromBase64String(iv);
         }
 
-        private void windowLoaded(object sender, RoutedEventArgs e) {
-            if (Properties.Settings.Default.TranqPath.Length == 0) {
+        private void windowLoaded(object sender, RoutedEventArgs e)
+        {
+            if (Properties.Settings.Default.TranqPath.Length == 0)
+            {
                 string path = this.getTranqPath();
-                if (path != null && File.Exists(Path.Combine(path, "bin", "Exefile.exe"))) {
+                if (path != null && File.Exists(Path.Combine(path, "bin", "Exefile.exe")))
+                {
                     Properties.Settings.Default.TranqPath = path;
                     Properties.Settings.Default.Save();
                 }
                 if (Properties.Settings.Default.SisiPath.Length == 0)
                     path = this.getSisiPath();
-                if (path != null && File.Exists(Path.Combine(path, "bin", "Exefile.exe"))) {
+                if (path != null && File.Exists(Path.Combine(path, "bin", "Exefile.exe")))
+                {
                     Properties.Settings.Default.SisiPath = path;
                     Properties.Settings.Default.Save();
                 }
@@ -64,34 +71,42 @@ namespace rlel {
             this.tray.ContextMenu.MenuItems.Add("Exit", this.contextMenuClick);
             this.tray.ContextMenu.MenuItems.Add("Singularity", this.contextMenuClick);
             this.tray.ContextMenu.MenuItems.Add("-");
-            if (Properties.Settings.Default.accounts != null) {
+            if (Properties.Settings.Default.accounts != null)
+            {
                 this.popAccounts();
             }
             this.tray.ContextMenu.MenuItems.Add("-");
             this.popContextMenu();
             this.tray.Visible = true;
+            this.CheckRlelUpdate();
         }
-        private void onballoonEvent(string[] args, System.Windows.Forms.ToolTipIcon tti) {
+        private void onballoonEvent(string[] args, System.Windows.Forms.ToolTipIcon tti)
+        {
             this.showBalloon(args[0], args[1], tti);
         }
 
-        private void browseClick(object sender, RoutedEventArgs e) {
+        private void browseClick(object sender, RoutedEventArgs e)
+        {
             System.Windows.Forms.FolderBrowserDialog fbd = new System.Windows.Forms.FolderBrowserDialog();
             fbd.ShowNewFolderButton = false;
             fbd.SelectedPath = this.evePath.Text;
-            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK) {
+            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
                 this.evePath.Text = fbd.SelectedPath;
             }
         }
 
-        private void windowStateChanged(object sender, EventArgs e) {
+        private void windowStateChanged(object sender, EventArgs e)
+        {
             this.ShowInTaskbar = (this.WindowState != System.Windows.WindowState.Minimized);
-            if (this.WindowState == System.Windows.WindowState.Minimized) {
+            if (this.WindowState == System.Windows.WindowState.Minimized)
+            {
                 this.Hide();
             }
         }
 
-        private void addAccountClick(object sender, RoutedEventArgs e) {
+        private void addAccountClick(object sender, RoutedEventArgs e)
+        {
             Account acc = new Account(this);
             this.accountsPanel.Items.Add(acc);
             this.accountsPanel.SelectedItem = acc;
@@ -99,8 +114,10 @@ namespace rlel {
             this.user.SelectAll();
         }
 
-        private void saveClick(object sender, RoutedEventArgs e) {
-            if (this.accountsPanel.SelectedItem == null) {
+        private void saveClick(object sender, RoutedEventArgs e)
+        {
+            if (this.accountsPanel.SelectedItem == null)
+            {
                 return;
             }
             ((Account)this.accountsPanel.SelectedItem).username.Text = this.user.Text;
@@ -109,16 +126,20 @@ namespace rlel {
             this.accountsPanel.Items.Refresh();
         }
 
-        private void removeClick(object sender, RoutedEventArgs e) {
+        private void removeClick(object sender, RoutedEventArgs e)
+        {
             List<Account> acl = new List<Account>();
-            foreach (Account a in this.accountsPanel.SelectedItems) {
+            foreach (Account a in this.accountsPanel.SelectedItems)
+            {
                 acl.Add(a);
             }
-            foreach (Account acct in acl) {
+            foreach (Account acct in acl)
+            {
                 this.accountsPanel.Items.Remove(acct);
             }
             this.updateCredentials();
-            if (this.accountsPanel.Items.Count > 0) {
+            if (this.accountsPanel.Items.Count > 0)
+            {
                 this.accountsPanel.SelectedItem = this.accountsPanel.Items[0];
             }
         }
@@ -128,10 +149,12 @@ namespace rlel {
             this.tray.Visible = false;
         }
 
-        private string getTranqPath() {
+        private string getTranqPath()
+        {
             String path = null;
             string appdata = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            foreach (string dir in Directory.EnumerateDirectories(Path.Combine(appdata, "CCP", "EVE"), "*_tranquility")) {
+            foreach (string dir in Directory.EnumerateDirectories(Path.Combine(appdata, "CCP", "EVE"), "*_tranquility"))
+            {
                 string[] split = dir.Split(new char[] { '_' }, 2);
                 string drive = split[0].Substring(split[0].Length - 1);
                 path = split[1].Substring(0, split[1].Length - "_tranquility".Length).Replace('_', Path.DirectorySeparatorChar);
@@ -141,10 +164,12 @@ namespace rlel {
             return path;
         }
 
-        private string getSisiPath() {
+        private string getSisiPath()
+        {
             String path = null;
             string appdata = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            foreach (string dir in Directory.EnumerateDirectories(Path.Combine(appdata, "CCP", "EVE"), "*_singularity")) {
+            foreach (string dir in Directory.EnumerateDirectories(Path.Combine(appdata, "CCP", "EVE"), "*_singularity"))
+            {
                 string[] split = dir.Split(new char[] { '_' }, 2);
                 string drive = split[0].Substring(split[0].Length - 1);
                 path = split[1].Substring(0, split[1].Length - "_singularity".Length).Replace('_', Path.DirectorySeparatorChar);
@@ -154,36 +179,45 @@ namespace rlel {
             return path;
         }
 
-        private void singularityClick(object sender, RoutedEventArgs e) {
-            if (this.singularity.IsChecked == false) {
+        private void singularityClick(object sender, RoutedEventArgs e)
+        {
+            if (this.singularity.IsChecked == false)
+            {
                 this.evePath.Text = Properties.Settings.Default.TranqPath;
             }
-            else {
+            else
+            {
                 this.evePath.Text = Properties.Settings.Default.SisiPath;
             }
             this.tray.ContextMenu.MenuItems[1].Checked = (bool)this.singularity.IsChecked;
         }
 
-        private void evePathTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) {
-            if (this.singularity.IsChecked == true) {
+        private void evePathTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (this.singularity.IsChecked == true)
+            {
                 Properties.Settings.Default.SisiPath = this.evePath.Text;
                 Properties.Settings.Default.Save();
             }
-            else {
+            else
+            {
                 Properties.Settings.Default.TranqPath = this.evePath.Text;
                 Properties.Settings.Default.Save();
             }
         }
 
-        private void popAccounts() {
-            foreach (string credentials in Properties.Settings.Default.accounts) {
+        private void popAccounts()
+        {
+            foreach (string credentials in Properties.Settings.Default.accounts)
+            {
                 Account account = new Account(this);
                 string[] split = credentials.Split(new char[] { ':' }, 3);
-				if (split.Length < 3) {
-					string user = split[0];
-					string pass = split[1];
-					split = new string[] {split[0], split[1], "" };
-				}
+                if (split.Length < 3)
+                {
+                    string user = split[0];
+                    string pass = split[1];
+                    split = new string[] { split[0], split[1], "" };
+                }
                 account.SettingsDir = split[2];
                 account.username.Text = split[0];
                 account.password.Password = this.decryptPass(rjm, split[1]);
@@ -192,11 +226,14 @@ namespace rlel {
             }
         }
 
-        private string getKey() {
-            if (Properties.Settings.Default.Key != null && Properties.Settings.Default.Key != "") {
+        private string getKey()
+        {
+            if (Properties.Settings.Default.Key != null && Properties.Settings.Default.Key != "")
+            {
                 return Properties.Settings.Default.Key;
             }
-            else {
+            else
+            {
                 this.rjm.GenerateKey();
                 Properties.Settings.Default.Key = Convert.ToBase64String(this.rjm.Key);
                 Properties.Settings.Default.Save();
@@ -204,11 +241,14 @@ namespace rlel {
             }
         }
 
-        private string getIV() {
-            if (Properties.Settings.Default.IV != null && Properties.Settings.Default.IV != "") {
+        private string getIV()
+        {
+            if (Properties.Settings.Default.IV != null && Properties.Settings.Default.IV != "")
+            {
                 return Properties.Settings.Default.IV;
             }
-            else {
+            else
+            {
                 this.rjm.GenerateIV();
                 Properties.Settings.Default.IV = Convert.ToBase64String(this.rjm.IV);
                 Properties.Settings.Default.Save();
@@ -216,7 +256,8 @@ namespace rlel {
             }
         }
 
-        private string encryptPass(RijndaelManaged rin, string pass) {
+        private string encryptPass(RijndaelManaged rin, string pass)
+        {
             ICryptoTransform encryptor = rin.CreateEncryptor();
             byte[] inblock = Encoding.Unicode.GetBytes(pass);
             byte[] encrypted = encryptor.TransformFinalBlock(inblock, 0, inblock.Length);
@@ -224,7 +265,8 @@ namespace rlel {
             return epass;
         }
 
-        private string decryptPass(RijndaelManaged rin, string epass) {
+        private string decryptPass(RijndaelManaged rin, string epass)
+        {
             ICryptoTransform decryptor = rin.CreateDecryptor();
             byte[] pass = Convert.FromBase64String(epass);
             byte[] outblock = decryptor.TransformFinalBlock(pass, 0, pass.Length);
@@ -232,8 +274,10 @@ namespace rlel {
             return dstring;
         }
 
-        private void trayClick(object sender, System.Windows.Forms.MouseEventArgs e) {
-            if (e.Button == System.Windows.Forms.MouseButtons.Left) {
+        private void trayClick(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button == System.Windows.Forms.MouseButtons.Left)
+            {
                 this.Show();
                 this.WindowState = System.Windows.WindowState.Normal;
             }
@@ -254,30 +298,37 @@ namespace rlel {
             else
             {
                 string path = Path.Combine(this.evePath.Text, "bin", "exefile.exe");
-                foreach (Account acct in this.accountsPanel.Items) {
+                foreach (Account acct in this.accountsPanel.Items)
+                {
                     if (acct.username.Text == username)
                         this.LaunchAccount((bool)this.singularity.IsChecked, path, acct);
                 }
             }
         }
 
-        private void popContextMenu() {
-            while (this.tray.ContextMenu.MenuItems.Count > 3) {
+        private void popContextMenu()
+        {
+            while (this.tray.ContextMenu.MenuItems.Count > 3)
+            {
                 this.tray.ContextMenu.MenuItems.RemoveAt(this.tray.ContextMenu.MenuItems.Count - 1);
             }
-            foreach (Account account in this.accountsPanel.Items) {
+            foreach (Account account in this.accountsPanel.Items)
+            {
                 this.tray.ContextMenu.MenuItems.Add(account.username.Text, this.contextMenuClick);
             }
 
         }
 
-        public void showBalloon(string title, string text, System.Windows.Forms.ToolTipIcon icon) {
+        public void showBalloon(string title, string text, System.Windows.Forms.ToolTipIcon icon)
+        {
             this.tray.ShowBalloonTip(1000, title, text, icon);
         }
 
-        public void updateCredentials() {
+        public void updateCredentials()
+        {
             StringCollection accounts = new StringCollection();
-            foreach (Account account in this.accountsPanel.Items) {
+            foreach (Account account in this.accountsPanel.Items)
+            {
                 string credentials = String.Format("{0}:{1}:{2}", account.username.Text, this.encryptPass(this.rjm, account.password.Password), account.SettingsDir);
                 accounts.Add(credentials);
             }
@@ -286,13 +337,15 @@ namespace rlel {
             this.popContextMenu();
         }
 
-        private bool checkFilePaths(string path) {
+        private bool checkFilePaths(string path)
+        {
             string exeFilePath;
             exeFilePath = Path.Combine(path, "bin", "ExeFile.exe");
             return File.Exists(exeFilePath);
         }
 
-        private void patch(string path, bool sisi) {
+        private void patch(string path, bool sisi)
+        {
             if (!sisi && tqpatching != null && tqpatching.IsAlive)
                 return;
             if (sisi && sisipatching != null && sisipatching.IsAlive)
@@ -305,10 +358,12 @@ namespace rlel {
             repair.WorkingDirectory = path;
             repair.WindowStyle = ProcessWindowStyle.Minimized;
             Process proc;
-            if (p == null) {
+            if (p == null)
+            {
                 proc = System.Diagnostics.Process.Start(repair);
             }
-            else {
+            else
+            {
                 proc = p;
             }
             string log = Path.Combine(repair.WorkingDirectory, "launcher", "cache", String.Format("launcher.{0}.log", DateTime.UtcNow.ToString("yyyy-MM-dd")));
@@ -322,17 +377,23 @@ namespace rlel {
 
         }
 
-        private void kill(string path, Process PID) {
+        private void kill(string path, Process PID)
+        {
             while (!File.Exists(path))
                 Thread.Sleep(1000);
             Thread.Sleep(5000);
-            using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
-                using (StreamReader sr = new StreamReader(fs)) {
+            using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                using (StreamReader sr = new StreamReader(fs))
+                {
                     string s = sr.ReadToEnd();
-                    while (true) {
+                    while (true)
+                    {
                         s = sr.ReadToEnd();
-                        if (s.Contains("Client update: successful")) {
-                            foreach (Process p in getChildren(PID.Id)) {
+                        if (s.Contains("Client update: successful"))
+                        {
+                            foreach (Process p in getChildren(PID.Id))
+                            {
                                 p.CloseMainWindow();
                             }
                             return;
@@ -345,18 +406,23 @@ namespace rlel {
             }
         }
 
-        private static bool allChildrenDead(int id) {
-            foreach (Process p in getChildren(id)) {
+        private static bool allChildrenDead(int id)
+        {
+            foreach (Process p in getChildren(id))
+            {
                 if (!p.HasExited)
                     return false;
             }
             return true;
         }
 
-        private Process isLauncherRunning(string path) {
+        private Process isLauncherRunning(string path)
+        {
             Process[] plist = Process.GetProcessesByName("launcher");
-            foreach (Process p in plist) {
-                if (((List<Process>)getChildren(p.Id)).Count == 0) {
+            foreach (Process p in plist)
+            {
+                if (((List<Process>)getChildren(p.Id)).Count == 0)
+                {
                     string split = p.Modules[0].FileName.Split(new string[] { "launcher" }, StringSplitOptions.None)[0];
                     if (path.ToLower() == split.ToLower().Substring(0, split.Length - 1))
                         return p;
@@ -365,18 +431,23 @@ namespace rlel {
             return null;
         }
 
-        private static IEnumerable<Process> getChildren(int id) {
+        private static IEnumerable<Process> getChildren(int id)
+        {
             List<Process> children = new List<Process>();
             List<Process> grandchildren = new List<Process>();
             ManagementObjectSearcher search = new ManagementObjectSearcher(String.Format("SELECT * FROM Win32_Process WHERE ParentProcessID={0}", id));
-            foreach (ManagementObject mo in search.Get()) {
-                try {
+            foreach (ManagementObject mo in search.Get())
+            {
+                try
+                {
                     children.Add(Process.GetProcessById(Convert.ToInt32(mo["ProcessID"])));
                 }
-                catch {
+                catch
+                {
                 }
             }
-            foreach (Process child in children) {
+            foreach (Process child in children)
+            {
                 grandchildren.AddRange(getChildren(child.Id));
             }
             children.AddRange(grandchildren);
@@ -384,8 +455,10 @@ namespace rlel {
 
         }
 
-        private void accountsPanelSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
-            if (this.accountsPanel.SelectedItem != null) {
+        private void accountsPanelSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (this.accountsPanel.SelectedItem != null)
+            {
                 if (((Account)this.accountsPanel.SelectedItem).username.Text != null)
                     this.user.Text = ((Account)this.accountsPanel.SelectedItem).username.Text;
                 if (((Account)this.accountsPanel.SelectedItem).password.Password != null)
@@ -397,7 +470,7 @@ namespace rlel {
         {
             string appdata = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             string mainSettingsDir = Directory.EnumerateDirectories(Path.Combine(appdata, "CCP", "EVE"), "*_tranquility").First<string>();
-        
+
             IEnumerable<string> dirs = Directory.EnumerateDirectories(mainSettingsDir, "settings_*");
 
             SettingsDialog sd = new SettingsDialog();
@@ -408,7 +481,7 @@ namespace rlel {
                 sd.SettingsDirectories.Items.Add(shortname);
 
             }
-            if (dirs.Count() > 1 ) 
+            if (dirs.Count() > 1)
             {
 
                 sd.Focus();
@@ -422,7 +495,8 @@ namespace rlel {
             this.updateCredentials();
         }
 
-        private void LaunchClick(object sender, RoutedEventArgs e){
+        private void LaunchClick(object sender, RoutedEventArgs e)
+        {
             string path = Path.Combine(this.evePath.Text, "bin", "exefile.exe");
             foreach (Account acct in this.accountsPanel.SelectedItems)
             {
@@ -433,7 +507,7 @@ namespace rlel {
 
         private void LaunchAccount(bool sisi, string path, Account acct)
         {
-            this.showBalloon("Launching...", acct.username.Text,  System.Windows.Forms.ToolTipIcon.Info);
+            this.showBalloon("Launching...", acct.username.Text, System.Windows.Forms.ToolTipIcon.Info);
             if (acct.SettingsDir == "")
             {
                 this.SetEveSettingsProfiles(acct);
@@ -470,10 +544,10 @@ namespace rlel {
             }
             if (ssoToken == null)
             {
-                this.showBalloon("logging in", "invalid username/password" , System.Windows.Forms.ToolTipIcon.Error);
+                this.showBalloon("logging in", "invalid username/password", System.Windows.Forms.ToolTipIcon.Error);
                 return;
             }
-            this.showBalloon("logging in", "launching" , System.Windows.Forms.ToolTipIcon.None);
+            this.showBalloon("logging in", "launching", System.Windows.Forms.ToolTipIcon.None);
             string args;
             if (sisi)
             {
@@ -564,7 +638,8 @@ namespace rlel {
             reqStream.Close();
             HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
 
-            if (resp.ResponseUri.Fragment.Length == 0) {
+            if (resp.ResponseUri.Fragment.Length == 0)
+            {
                 resp.Close();
                 Authenticator auth = new Authenticator();
                 auth.ShowDialog();
@@ -603,10 +678,12 @@ namespace rlel {
 
             return accessToken;
         }
-        
+
         //upgrades settings file from older versions of rlel to new version
-        private void settingsUpgrade() {
-            if (Properties.Settings.Default.upgraded != true) {
+        private void settingsUpgrade()
+        {
+            if (Properties.Settings.Default.upgraded != true)
+            {
                 Properties.Settings.Default.Upgrade();
                 Properties.Settings.Default.upgraded = true;
                 Properties.Settings.Default.Save();
@@ -621,9 +698,49 @@ namespace rlel {
         //save credentials when return is pressed in either input box
         private void user_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if( e.Key == System.Windows.Input.Key.Enter)
+            if (e.Key == System.Windows.Input.Key.Enter)
             {
                 this.saveClick(this, e);
+            }
+        }
+        // check if local version is >= remote
+        private void CheckRlelUpdate()
+        {
+            Boolean upToDate = true;
+            FileVersionInfo fvi = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileVersionInfo;
+            int[] localVersion = new int[3];
+            localVersion[0] = fvi.ProductMajorPart;
+            localVersion[1] = fvi.ProductMinorPart;
+            localVersion[2] = fvi.ProductBuildPart;
+            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create("https://api.github.com/repos/frosty-nee/rlel/releases/latest");
+            req.Timeout = 5000;
+            req.Method = "GET";
+            req.UserAgent = String.Format("Rapid Light EVE Launcher v{0}",fvi.FileVersion );
+            req.ContentType = "text/html";
+
+
+
+            HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
+            using (Stream responseStream= resp.GetResponseStream())
+            using (StreamReader reader = new StreamReader(responseStream))
+            {
+                string read = reader.ReadToEnd();
+                JObject jo = JObject.Parse(read);
+                string tag = (string)jo["tag_name"];
+                string[] split = tag.Split('.');
+                for (int i = 0; i < 3; i++)
+                {
+                    if(int.Parse(split[i]) > localVersion[i])
+                    {
+                        upToDate = false;
+                    }
+                }
+            }
+
+            if (!upToDate)
+            {
+                UpdateDialog ud = new UpdateDialog();
+                ud.ShowDialog();
             }
         }
     }
