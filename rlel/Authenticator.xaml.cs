@@ -18,9 +18,10 @@ namespace rlel
     /// </summary>
     public partial class Authenticator : Window
     {
-        public Authenticator()
+        public Authenticator(Account acct)
         {
             InitializeComponent();
+            this.notification.Text += acct.username.Text;
         }
 
         private void submit_Click(object sender, RoutedEventArgs e)
