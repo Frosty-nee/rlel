@@ -1,19 +1,11 @@
-# Project is currently not working, but is in the process of being updated. 
-
 # Rapid Light EVE Launcher
 
 rlel (yes I hate this acronym too) is a replacement for the CCP launcher that supports launching both 
 Tranquility and Singularity clients, as well as keeping those clients up to date automagically
 
-<br>![alt](http://i.imgur.com/uA0bCYQ.png)
+<br>![alt](https://i.imgur.com/QtaQu9o.png)
 
 ## FAQ
-
-### are there binaries?
-
-an installer can be found at 
-
-http://rlel.frosty-nee.net/rlel.msi
 
 ### are passwords encrypted?
 
@@ -21,7 +13,7 @@ yes
 
 ### do you steal my password
 
-I resist the urge to collect them for science
+no
 
 ### how does it work?
 
