@@ -24,12 +24,12 @@ namespace rlel
             this.notification.Text += acct.username.Text;
         }
 
-        private void submit_Click(object sender, RoutedEventArgs e)
+        private void Submit_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
 
-        private void authCode_KeyDown(object sender, KeyEventArgs e)
+        private void AuthCode_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
                 this.Close();

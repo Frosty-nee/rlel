@@ -24,35 +24,33 @@ namespace rlel {
     {
 
         System.Windows.Forms.NotifyIcon tray;
-        int tranqVersion;
-        int sisiVersion;
         EventHandler contextMenuClick;
         RijndaelManaged rjm = new RijndaelManaged();
-        Thread tqpatching;
-        Thread sisipatching;
+        Thread tqPatching;
+        Thread sisiPatching;
 
         public MainWindow()
         {
-            this.settingsUpgrade();
+            this.SettingsUpgrade();
             InitializeComponent();
-            string key = this.getKey();
-            string iv = this.getIV();
+            string key = this.GetKey();
+            string iv = this.GetIV();
             this.rjm.Key = Convert.FromBase64String(key);
             this.rjm.IV = Convert.FromBase64String(iv);
         }
 
-        private void windowLoaded(object sender, RoutedEventArgs e)
+        private void WindowLoaded(object sender, RoutedEventArgs e)
         {
             if (Properties.Settings.Default.TranqPath.Length == 0)
             {
-                string path = this.getTranqPath();
+                string path = this.GetTranqPath();
                 if (path != null && File.Exists(Path.Combine(path, "bin", "Exefile.exe")))
                 {
                     Properties.Settings.Default.TranqPath = path;
                     Properties.Settings.Default.Save();
                 }
                 if (Properties.Settings.Default.SisiPath.Length == 0)
-                    path = this.getSisiPath();
+                    path = this.GetSisiPath();
                 if (path != null && File.Exists(Path.Combine(path, "bin", "Exefile.exe")))
                 {
                     Properties.Settings.Default.SisiPath = path;
@@ -62,41 +60,45 @@ namespace rlel {
 
 ;
             this.evePath.Text = Properties.Settings.Default.TranqPath;
-            this.tray = new System.Windows.Forms.NotifyIcon();
-            this.tray.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ResourceAssembly.Location);
-            this.tray.Text = this.Title;
-            this.tray.ContextMenu = new System.Windows.Forms.ContextMenu();
-            this.tray.MouseClick += new System.Windows.Forms.MouseEventHandler(this.trayClick);
-            this.contextMenuClick = new EventHandler(this.contextMenu_Click);
+            this.tray = new System.Windows.Forms.NotifyIcon
+            {
+                Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ResourceAssembly.Location),
+                Text = this.Title,
+                ContextMenu = new System.Windows.Forms.ContextMenu()
+            };
+            this.tray.MouseClick += new System.Windows.Forms.MouseEventHandler(this.TrayClick);
+            this.contextMenuClick = new EventHandler(this.ContextMenu_Click);
             this.tray.ContextMenu.MenuItems.Add("Exit", this.contextMenuClick);
             this.tray.ContextMenu.MenuItems.Add("Singularity", this.contextMenuClick);
             this.tray.ContextMenu.MenuItems.Add("-");
             if (Properties.Settings.Default.accounts != null)
             {
-                this.popAccounts();
+                this.PopAccountss();
             }
             this.tray.ContextMenu.MenuItems.Add("-");
-            this.popContextMenu();
+            this.PopContextMenu();
             this.tray.Visible = true;
             this.CheckRlelUpdate();
         }
-        private void onballoonEvent(string[] args, System.Windows.Forms.ToolTipIcon tti)
+        private void OnballoonEvent(string[] args, System.Windows.Forms.ToolTipIcon tti)
         {
-            this.showBalloon(args[0], args[1], tti);
+            this.ShowBalloon(args[0], args[1], tti);
         }
 
-        private void browseClick(object sender, RoutedEventArgs e)
+        private void BrowseClick(object sender, RoutedEventArgs e)
         {
-            System.Windows.Forms.FolderBrowserDialog fbd = new System.Windows.Forms.FolderBrowserDialog();
-            fbd.ShowNewFolderButton = false;
-            fbd.SelectedPath = this.evePath.Text;
+            System.Windows.Forms.FolderBrowserDialog fbd = new System.Windows.Forms.FolderBrowserDialog
+            {
+                ShowNewFolderButton = false,
+                SelectedPath = this.evePath.Text
+            };
             if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 this.evePath.Text = fbd.SelectedPath;
             }
         }
 
-        private void windowStateChanged(object sender, EventArgs e)
+        private void WindowStateChanged(object sender, EventArgs e)
         {
             this.ShowInTaskbar = (this.WindowState != System.Windows.WindowState.Minimized);
             if (this.WindowState == System.Windows.WindowState.Minimized)
@@ -105,7 +107,7 @@ namespace rlel {
             }
         }
 
-        private void addAccountClick(object sender, RoutedEventArgs e)
+        private void AddAccountClick(object sender, RoutedEventArgs e)
         {
             Account acc = new Account(this);
             this.accountsPanel.Items.Add(acc);
@@ -114,7 +116,7 @@ namespace rlel {
             this.user.SelectAll();
         }
 
-        private void saveClick(object sender, RoutedEventArgs e)
+        private void SaveClick(object sender, RoutedEventArgs e)
         {
             if (this.accountsPanel.SelectedItem == null)
             {
@@ -122,11 +124,11 @@ namespace rlel {
             }
             ((Account)this.accountsPanel.SelectedItem).username.Text = this.user.Text;
             ((Account)this.accountsPanel.SelectedItem).password.Password = this.pass.Password;
-            this.updateCredentials();
+            this.UpdateCredentials();
             this.accountsPanel.Items.Refresh();
         }
 
-        private void removeClick(object sender, RoutedEventArgs e)
+        private void RemoveClick(object sender, RoutedEventArgs e)
         {
             List<Account> acl = new List<Account>();
             foreach (Account a in this.accountsPanel.SelectedItems)
@@ -137,19 +139,19 @@ namespace rlel {
             {
                 this.accountsPanel.Items.Remove(acct);
             }
-            this.updateCredentials();
+            this.UpdateCredentials();
             if (this.accountsPanel.Items.Count > 0)
             {
                 this.accountsPanel.SelectedItem = this.accountsPanel.Items[0];
             }
         }
 
-        private void windowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             this.tray.Visible = false;
         }
 
-        private string getTranqPath()
+        private string GetTranqPath()
         {
             String path = null;
             string appdata = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -164,7 +166,7 @@ namespace rlel {
             return path;
         }
 
-        private string getSisiPath()
+        private string GetSisiPath()
         {
             String path = null;
             string appdata = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -179,7 +181,7 @@ namespace rlel {
             return path;
         }
 
-        private void singularityClick(object sender, RoutedEventArgs e)
+        private void SingularityClick(object sender, RoutedEventArgs e)
         {
             if (this.singularity.IsChecked == false)
             {
@@ -192,7 +194,7 @@ namespace rlel {
             this.tray.ContextMenu.MenuItems[1].Checked = (bool)this.singularity.IsChecked;
         }
 
-        private void evePathTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        private void EvePathTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             if (this.singularity.IsChecked == true)
             {
@@ -206,7 +208,7 @@ namespace rlel {
             }
         }
 
-        private void popAccounts()
+        private void PopAccountss()
         {
             foreach (string credentials in Properties.Settings.Default.accounts)
             {
@@ -220,13 +222,13 @@ namespace rlel {
                 }
                 account.SettingsDir = split[2];
                 account.username.Text = split[0];
-                account.password.Password = this.decryptPass(rjm, split[1]);
+                account.password.Password = this.DecryptPass(rjm, split[1]);
                 this.accountsPanel.Items.Add(account);
                 this.accountsPanel.SelectedItem = this.accountsPanel.Items[0];
             }
         }
 
-        private string getKey()
+        private string GetKey()
         {
             if (Properties.Settings.Default.Key != null && Properties.Settings.Default.Key != "")
             {
@@ -241,7 +243,7 @@ namespace rlel {
             }
         }
 
-        private string getIV()
+        private string GetIV()
         {
             if (Properties.Settings.Default.IV != null && Properties.Settings.Default.IV != "")
             {
@@ -256,7 +258,7 @@ namespace rlel {
             }
         }
 
-        private string encryptPass(RijndaelManaged rin, string pass)
+        private string EncryptPass(RijndaelManaged rin, string pass)
         {
             ICryptoTransform encryptor = rin.CreateEncryptor();
             byte[] inblock = Encoding.Unicode.GetBytes(pass);
@@ -265,7 +267,7 @@ namespace rlel {
             return epass;
         }
 
-        private string decryptPass(RijndaelManaged rin, string epass)
+        private string DecryptPass(RijndaelManaged rin, string epass)
         {
             ICryptoTransform decryptor = rin.CreateDecryptor();
             byte[] pass = Convert.FromBase64String(epass);
@@ -274,7 +276,7 @@ namespace rlel {
             return dstring;
         }
 
-        private void trayClick(object sender, System.Windows.Forms.MouseEventArgs e)
+        private void TrayClick(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
@@ -283,7 +285,7 @@ namespace rlel {
             }
         }
 
-        private void contextMenu_Click(object sender, EventArgs e)
+        private void ContextMenu_Click(object sender, EventArgs e)
         {
             string username = ((System.Windows.Forms.MenuItem)sender).Text;
             if (username == "Singularity")
@@ -306,7 +308,7 @@ namespace rlel {
             }
         }
 
-        private void popContextMenu()
+        private void PopContextMenu()
         {
             while (this.tray.ContextMenu.MenuItems.Count > 3)
             {
@@ -319,143 +321,32 @@ namespace rlel {
 
         }
 
-        public void showBalloon(string title, string text, System.Windows.Forms.ToolTipIcon icon)
+        public void ShowBalloon(string title, string text, System.Windows.Forms.ToolTipIcon icon)
         {
             this.tray.ShowBalloonTip(1000, title, text, icon);
         }
 
-        public void updateCredentials()
+        public void UpdateCredentials()
         {
             StringCollection accounts = new StringCollection();
             foreach (Account account in this.accountsPanel.Items)
             {
-                string credentials = String.Format("{0}:{1}:{2}", account.username.Text, this.encryptPass(this.rjm, account.password.Password), account.SettingsDir);
+                string credentials = String.Format("{0}:{1}:{2}", account.username.Text, this.EncryptPass(this.rjm, account.password.Password), account.SettingsDir);
                 accounts.Add(credentials);
             }
             Properties.Settings.Default.accounts = accounts;
             Properties.Settings.Default.Save();
-            this.popContextMenu();
+            this.PopContextMenu();
         }
 
-        private bool checkFilePaths(string path)
+        private bool CheckFilePaths(string path)
         {
             string exeFilePath;
             exeFilePath = Path.Combine(path, "bin", "ExeFile.exe");
             return File.Exists(exeFilePath);
         }
 
-        private void patch(string path, bool sisi)
-        {
-            if (!sisi && tqpatching != null && tqpatching.IsAlive)
-                return;
-            if (sisi && sisipatching != null && sisipatching.IsAlive)
-                return;
-
-            Process p = isLauncherRunning(path);
-            System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\eve.exe", "");
-            if (sisi)
-                repair = new System.Diagnostics.ProcessStartInfo(@".\eve.exe", "/server:singularity");
-            repair.WorkingDirectory = path;
-            repair.WindowStyle = ProcessWindowStyle.Minimized;
-            Process proc;
-            if (p == null)
-            {
-                proc = System.Diagnostics.Process.Start(repair);
-            }
-            else
-            {
-                proc = p;
-            }
-            string log = Path.Combine(repair.WorkingDirectory, "launcher", "cache", String.Format("launcher.{0}.log", DateTime.UtcNow.ToString("yyyy-MM-dd")));
-            Thread akill = new Thread(() => this.kill(log, proc));
-            akill.Start();
-
-            if (!sisi)
-                tqpatching = akill;
-            else
-                sisipatching = akill;
-
-        }
-
-        private void kill(string path, Process PID)
-        {
-            while (!File.Exists(path))
-                Thread.Sleep(1000);
-            Thread.Sleep(5000);
-            using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                using (StreamReader sr = new StreamReader(fs))
-                {
-                    string s = sr.ReadToEnd();
-                    while (true)
-                    {
-                        s = sr.ReadToEnd();
-                        if (s.Contains("Client update: successful"))
-                        {
-                            foreach (Process p in getChildren(PID.Id))
-                            {
-                                p.CloseMainWindow();
-                            }
-                            return;
-                        }
-                        if (allChildrenDead(PID.Id))
-                            return;
-                        Thread.Sleep(1000);
-                    }
-                }
-            }
-        }
-
-        private static bool allChildrenDead(int id)
-        {
-            foreach (Process p in getChildren(id))
-            {
-                if (!p.HasExited)
-                    return false;
-            }
-            return true;
-        }
-
-        private Process isLauncherRunning(string path)
-        {
-            Process[] plist = Process.GetProcessesByName("launcher");
-            foreach (Process p in plist)
-            {
-                if (((List<Process>)getChildren(p.Id)).Count == 0)
-                {
-                    string split = p.Modules[0].FileName.Split(new string[] { "launcher" }, StringSplitOptions.None)[0];
-                    if (path.ToLower() == split.ToLower().Substring(0, split.Length - 1))
-                        return p;
-                }
-            }
-            return null;
-        }
-
-        private static IEnumerable<Process> getChildren(int id)
-        {
-            List<Process> children = new List<Process>();
-            List<Process> grandchildren = new List<Process>();
-            ManagementObjectSearcher search = new ManagementObjectSearcher(String.Format("SELECT * FROM Win32_Process WHERE ParentProcessID={0}", id));
-            foreach (ManagementObject mo in search.Get())
-            {
-                try
-                {
-                    children.Add(Process.GetProcessById(Convert.ToInt32(mo["ProcessID"])));
-                }
-                catch
-                {
-                }
-            }
-            foreach (Process child in children)
-            {
-                grandchildren.AddRange(getChildren(child.Id));
-            }
-            children.AddRange(grandchildren);
-            return children;
-
-        }
-
-        private void accountsPanelSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void AccountsPanel_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if (this.accountsPanel.SelectedItem != null)
             {
@@ -492,7 +383,7 @@ namespace rlel {
             {
                 acct.SettingsDir = (string)sd.SettingsDirectories.Items[0];
             }
-            this.updateCredentials();
+            this.UpdateCredentials();
         }
 
         private void LaunchClick(object sender, RoutedEventArgs e)
@@ -507,7 +398,7 @@ namespace rlel {
 
         private void LaunchAccount(bool sisi, string path, Account acct)
         {
-            this.showBalloon("Launching...", acct.username.Text, System.Windows.Forms.ToolTipIcon.Info);
+            this.ShowBalloon("Launching...", acct.username.Text, System.Windows.Forms.ToolTipIcon.Info);
             if (acct.SettingsDir == "")
             {
                 this.SetEveSettingsProfiles(acct);
@@ -522,32 +413,32 @@ namespace rlel {
             }
             if (!File.Exists(path))
             {
-                this.showBalloon("eve path", "could not find" + path, System.Windows.Forms.ToolTipIcon.Error);
+                this.ShowBalloon("eve path", "could not find" + path, System.Windows.Forms.ToolTipIcon.Error);
                 return;
             }
             else if (acct.username.Text.Length == 0 || acct.password.Password.Length == 0)
             {
-                this.showBalloon("logging in", "missing username or password", System.Windows.Forms.ToolTipIcon.Error);
+                this.ShowBalloon("logging in", "missing username or password", System.Windows.Forms.ToolTipIcon.Error);
                 return;
             }
-            this.showBalloon("logging in", acct.username.Text, System.Windows.Forms.ToolTipIcon.None);
+            this.ShowBalloon("logging in", acct.username.Text, System.Windows.Forms.ToolTipIcon.None);
             string ssoToken = null;
             try
             {
-                ssoToken = this.getSSOToken(acct, sisi);
+                ssoToken = this.GetSSOToken(acct, sisi);
             }
             catch (WebException e)
             {
                 accessToken = null;
-                this.showBalloon("logging in", e.Message, System.Windows.Forms.ToolTipIcon.Error);
+                this.ShowBalloon("logging in", e.Message, System.Windows.Forms.ToolTipIcon.Error);
                 return;
             }
             if (ssoToken == null)
             {
-                this.showBalloon("logging in", "invalid username/password", System.Windows.Forms.ToolTipIcon.Error);
+                this.ShowBalloon("logging in", "invalid username/password", System.Windows.Forms.ToolTipIcon.Error);
                 return;
             }
-            this.showBalloon("logging in", "launching", System.Windows.Forms.ToolTipIcon.None);
+            this.ShowBalloon("logging in", "launching", System.Windows.Forms.ToolTipIcon.None);
             string args;
             if (sisi)
             {
@@ -573,7 +464,7 @@ namespace rlel {
             return;
         }
 
-        private string getSSOToken(Account acct, bool sisi)
+        private string GetSSOToken(Account acct, bool sisi)
         {
             string accessToken = this.GetAccessToken(acct, sisi);
             string uri = "https://login.eveonline.com/launcher/token?accesstoken=" + accessToken;
@@ -680,7 +571,7 @@ namespace rlel {
         }
 
         //upgrades settings file from older versions of rlel to new version
-        private void settingsUpgrade()
+        private void SettingsUpgrade()
         {
             if (Properties.Settings.Default.upgraded != true)
             {
@@ -696,11 +587,11 @@ namespace rlel {
             this.SetEveSettingsProfiles(acct);
         }
         //save credentials when return is pressed in either input box
-        private void user_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        private void User_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == System.Windows.Input.Key.Enter)
             {
-                this.saveClick(this, e);
+                this.SaveClick(this, e);
             }
         }
         // check if local version is >= remote
