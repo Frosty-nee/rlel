@@ -73,7 +73,7 @@ namespace rlel {
             this.tray.ContextMenu.MenuItems.Add("-");
             if (Properties.Settings.Default.accounts != null)
             {
-                this.PopAccountss();
+                this.PopAccounts();
             }
             this.tray.ContextMenu.MenuItems.Add("-");
             this.PopContextMenu();
@@ -208,7 +208,7 @@ namespace rlel {
             }
         }
 
-        private void PopAccountss()
+        private void PopAccounts()
         {
             foreach (string credentials in Properties.Settings.Default.accounts)
             {
