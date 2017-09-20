@@ -26,17 +26,12 @@ namespace rlel {
         System.Windows.Forms.NotifyIcon tray;
         EventHandler contextMenuClick;
         RijndaelManaged rjm = new RijndaelManaged();
-        Thread tqPatching;
-        Thread sisiPatching;
 
         public MainWindow()
         {
             this.SettingsUpgrade();
             InitializeComponent();
-            string key = this.GetKey();
-            string iv = this.GetIV();
-            this.rjm.Key = Convert.FromBase64String(key);
-            this.rjm.IV = Convert.FromBase64String(iv);
+            
         }
 
         private void WindowLoaded(object sender, RoutedEventArgs e)
@@ -57,7 +52,21 @@ namespace rlel {
                     Properties.Settings.Default.Save();
                 }
             }
-
+            //get password from user to decrypt account credentials
+            string key;
+            if (Properties.Settings.Default.IV == "" || Properties.Settings.Default.IV == null)
+            {
+                key = this.SetKey();
+            }
+            else
+            {
+                key = this.GetKey();
+            }
+            string iv = this.GetIV();
+            HashAlgorithm algo = SHA256.Create();
+            byte[] hashedKey = algo.ComputeHash(Encoding.UTF8.GetBytes(key.ToCharArray()));
+            this.rjm.Key = hashedKey;
+            this.rjm.IV = Convert.FromBase64String(iv);
 ;
             this.evePath.Text = Properties.Settings.Default.TranqPath;
             this.tray = new System.Windows.Forms.NotifyIcon
@@ -214,14 +223,8 @@ namespace rlel {
             {
                 Account account = new Account(this);
                 string[] split = credentials.Split(new char[] { ':' }, 3);
-                if (split.Length < 3)
-                {
-                    string user = split[0];
-                    string pass = split[1];
-                    split = new string[] { split[0], split[1], "" };
-                }
                 account.SettingsDir = split[2];
-                account.username.Text = split[0];
+                account.username.Text = this.DecryptPass(rjm, split[0]);
                 account.password.Password = this.DecryptPass(rjm, split[1]);
                 this.accountsPanel.Items.Add(account);
                 this.accountsPanel.SelectedItem = this.accountsPanel.Items[0];
@@ -230,19 +233,21 @@ namespace rlel {
 
         private string GetKey()
         {
-            if (Properties.Settings.Default.Key != null && Properties.Settings.Default.Key != "")
-            {
-                return Properties.Settings.Default.Key;
-            }
-            else
-            {
-                this.rjm.GenerateKey();
-                Properties.Settings.Default.Key = Convert.ToBase64String(this.rjm.Key);
-                Properties.Settings.Default.Save();
-                return Properties.Settings.Default.Key;
-            }
+            UnlockDialog ud = new UnlockDialog();
+            string pass;
+            ud.Pass.Focus();
+            ud.ShowDialog();
+            return (ud.Pass.Password);
         }
 
+        private string SetKey()
+        {
+            UnlockDialog ud = new UnlockDialog();
+            ud.prompt.Text = "Enter a new password to use rlel";
+            ud.Pass.Focus();
+            ud.ShowDialog();
+            return (ud.Pass.Password);
+        }
         private string GetIV()
         {
             if (Properties.Settings.Default.IV != null && Properties.Settings.Default.IV != "")
@@ -331,7 +336,7 @@ namespace rlel {
             StringCollection accounts = new StringCollection();
             foreach (Account account in this.accountsPanel.Items)
             {
-                string credentials = String.Format("{0}:{1}:{2}", account.username.Text, this.EncryptPass(this.rjm, account.password.Password), account.SettingsDir);
+                string credentials = String.Format("{0}:{1}:{2}", this.EncryptPass(this.rjm, account.username.Text), this.EncryptPass(this.rjm, account.password.Password), account.SettingsDir);
                 accounts.Add(credentials);
             }
             Properties.Settings.Default.accounts = accounts;
@@ -399,7 +404,7 @@ namespace rlel {
         private void LaunchAccount(bool sisi, string path, Account acct)
         {
             this.ShowBalloon("Launching...", acct.username.Text, System.Windows.Forms.ToolTipIcon.Info);
-            if (acct.SettingsDir == "")
+            if (acct.SettingsDir == "" || acct.SettingsDir == null)
             {
                 this.SetEveSettingsProfiles(acct);
             }
@@ -634,6 +639,7 @@ namespace rlel {
                 ud.ShowDialog();
             }
         }
+
     }
 }
 

@@ -8,12 +8,12 @@
         <TextBox Name="evePath" Height="23" Width="220" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="12,12,0,0" TextChanged="EvePathTextChanged" />
         <CheckBox Name="singularity" Content="Singularity" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="242,15,0,0" Click="SingularityClick" />
         <Button Content="Browse" Name="browse" Click="BrowseClick" HorizontalAlignment="left" VerticalAlignment="Top" Height="23" Width="70" Margin="333,11,0,0" />
-        <TextBox Name="user" Height="23" Width="145" HorizontalAlignment="Left" VerticalAlignment="top" Margin="12,69,0,0" KeyDown="user_KeyDown" />
-        <PasswordBox Name="pass" Height="23" Width="145" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="162,69,0,0" KeyDown="user_KeyDown"  />
+        <TextBox Name="user" Height="23" Width="145" HorizontalAlignment="Left" VerticalAlignment="top" Margin="12,69,0,0" KeyDown="User_KeyDown" />
+        <PasswordBox Name="pass" Height="23" Width="145" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="162,69,0,0" KeyDown="User_KeyDown"  />
         <Button Name="save" Content="Save" HorizontalAlignment="Left" VerticalAlignment="Top" Click="SaveClick" Height="23" Width="90" Margin="313,97,0,0" />
         <Button Name="addAccount" Content="Add Account" Click="AddAccountClick" Height="23" Width="90" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="313,155,0,0" />
         <Button Name="remove" Content="Remove" Click="RemoveClick" Height="23" Width="90" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="313,184,0,0" />
         <Button Name="launch" Content="Launch" Click="LaunchClick"  HorizontalAlignment="Left" VerticalAlignment="Top" Height="23" Width="90" Margin="313,126,0,0" />
-        <ListBox Name="accountsPanel" Margin="12,97,0,0" SelectionMode="Extended" HorizontalAlignment="Left" VerticalAlignment="Top" Width="295" MouseDoubleClick="LaunchClick" SelectionChanged="accountsPanelSelectionChanged" Height="247" />
+        <ListBox Name="accountsPanel" Margin="12,97,0,0" SelectionMode="Extended" HorizontalAlignment="Left" VerticalAlignment="Top" Width="295" MouseDoubleClick="LaunchClick" SelectionChanged="AccountsPanel_SelectionChanged" Height="247" />
     </Grid>
 </Window>
