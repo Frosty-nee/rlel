@@ -18,6 +18,7 @@ namespace rlel
     /// </summary>
     public partial class UnlockDialog : Window
     {
+        public Boolean reset = false;
         public UnlockDialog()
         {
             InitializeComponent();
@@ -38,6 +39,9 @@ namespace rlel
         {
             Properties.Settings.Default.accounts = null;
             Properties.Settings.Default.IV = null;
+            Properties.Settings.Default.Key = null;
+            Properties.Settings.Default.Save();
+            this.reset = true;
             this.prompt.Text = "Account information reset, enter a new password";
         }
     }

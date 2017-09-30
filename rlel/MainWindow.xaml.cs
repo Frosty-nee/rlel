@@ -54,20 +54,29 @@ namespace rlel {
             }
             //get password from user to decrypt account credentials
             string key;
-            if (Properties.Settings.Default.IV == "" || Properties.Settings.Default.IV == null)
+            HashAlgorithm hashAlgorithm = SHA256.Create();
+            while (true)
             {
-                key = this.SetKey();
+                if (Properties.Settings.Default.IV == "" || Properties.Settings.Default.IV == null)
+                {
+                    key = this.SetKey();
+                    this.rjm.IV = Convert.FromBase64String(this.GetIV());
+                    this.rjm.Key = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(key));
+                    Properties.Settings.Default.Key = this.EncryptPass("this is a string");
+                    Properties.Settings.Default.Save();
+                    break;
+                }
+                else
+                {
+                this.rjm.IV = Convert.FromBase64String(this.GetIV());
+                key = this.GetKey(hashAlgorithm);
+                if (CheckKey(key, hashAlgorithm))
+                    break;
+                }
             }
-            else
-            {
-                key = this.GetKey();
-            }
-            string iv = this.GetIV();
-            HashAlgorithm algo = SHA256.Create();
-            byte[] hashedKey = algo.ComputeHash(Encoding.UTF8.GetBytes(key.ToCharArray()));
+            byte[] hashedKey = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(key.ToCharArray()));
             this.rjm.Key = hashedKey;
-            this.rjm.IV = Convert.FromBase64String(iv);
-;
+
             this.evePath.Text = Properties.Settings.Default.TranqPath;
             this.tray = new System.Windows.Forms.NotifyIcon
             {
@@ -224,19 +233,25 @@ namespace rlel {
                 Account account = new Account(this);
                 string[] split = credentials.Split(new char[] { ':' }, 3);
                 account.SettingsDir = split[2];
-                account.username.Text = this.DecryptPass(rjm, split[0]);
-                account.password.Password = this.DecryptPass(rjm, split[1]);
+                account.username.Text = this.DecryptPass(split[0]);
+                account.password.Password = this.DecryptPass(split[1]);
                 this.accountsPanel.Items.Add(account);
                 this.accountsPanel.SelectedItem = this.accountsPanel.Items[0];
             }
         }
 
-        private string GetKey()
+        private string GetKey(HashAlgorithm hashAlgorithm)
         {
             UnlockDialog ud = new UnlockDialog();
-            string pass;
             ud.Pass.Focus();
             ud.ShowDialog();
+            if (ud.reset)
+            {
+                this.rjm.Key = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(ud.Pass.Password));
+                Properties.Settings.Default.IV = this.GetIV();
+                Properties.Settings.Default.Key = this.EncryptPass("this is a string");
+                Properties.Settings.Default.Save();
+            }
             return (ud.Pass.Password);
         }
 
@@ -247,6 +262,21 @@ namespace rlel {
             ud.Pass.Focus();
             ud.ShowDialog();
             return (ud.Pass.Password);
+        }
+
+        private Boolean CheckKey(string key, HashAlgorithm hashAlgorithm)
+        {
+            byte[] hashedkey = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(key));
+            try
+            {
+                this.rjm.Key = hashedkey;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+            return true;
         }
         private string GetIV()
         {
@@ -263,18 +293,18 @@ namespace rlel {
             }
         }
 
-        private string EncryptPass(RijndaelManaged rin, string pass)
+        private string EncryptPass(string pass)
         {
-            ICryptoTransform encryptor = rin.CreateEncryptor();
+            ICryptoTransform encryptor = this.rjm.CreateEncryptor();
             byte[] inblock = Encoding.Unicode.GetBytes(pass);
             byte[] encrypted = encryptor.TransformFinalBlock(inblock, 0, inblock.Length);
             string epass = Convert.ToBase64String(encrypted);
             return epass;
         }
 
-        private string DecryptPass(RijndaelManaged rin, string epass)
+        private string DecryptPass(string epass)
         {
-            ICryptoTransform decryptor = rin.CreateDecryptor();
+            ICryptoTransform decryptor = this.rjm.CreateDecryptor();
             byte[] pass = Convert.FromBase64String(epass);
             byte[] outblock = decryptor.TransformFinalBlock(pass, 0, pass.Length);
             string dstring = Encoding.Unicode.GetString(outblock);
@@ -336,7 +366,7 @@ namespace rlel {
             StringCollection accounts = new StringCollection();
             foreach (Account account in this.accountsPanel.Items)
             {
-                string credentials = String.Format("{0}:{1}:{2}", this.EncryptPass(this.rjm, account.username.Text), this.EncryptPass(this.rjm, account.password.Password), account.SettingsDir);
+                string credentials = String.Format("{0}:{1}:{2}", this.EncryptPass(account.username.Text), this.EncryptPass(account.password.Password), account.SettingsDir);
                 accounts.Add(credentials);
             }
             Properties.Settings.Default.accounts = accounts;
