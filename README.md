@@ -1,13 +1,19 @@
 # Rapid Light EVE Launcher
 
 rlel (yes I hate this acronym too) is a replacement for the CCP launcher that supports launching both 
-Tranquility and Singularity clients, as well as keeping those clients up to date automagically
+Tranquility and Singularity clients.
+
+Multiple accounts can be launched simultaneously from the app, or you can launch them from the system tray, the launcher also supports settings profiles, and each account can be set to use a different profile if desired.
 
 <br>![alt](https://i.imgur.com/QtaQu9o.png)
 
 ## FAQ
 
 ### are passwords encrypted?
+
+yes
+
+### is 2fa login supported?
 
 yes
 
