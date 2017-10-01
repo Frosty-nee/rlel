@@ -57,6 +57,7 @@ namespace rlel {
             HashAlgorithm hashAlgorithm = SHA256.Create();
             while (true)
             {
+                //if IV isn't set, we know that the user hasn't set a key to yet
                 if (Properties.Settings.Default.IV == "" || Properties.Settings.Default.IV == null)
                 {
                     key = this.SetKey();
@@ -84,6 +85,7 @@ namespace rlel {
                 Text = this.Title,
                 ContextMenu = new System.Windows.Forms.ContextMenu()
             };
+            
             this.tray.MouseClick += new System.Windows.Forms.MouseEventHandler(this.TrayClick);
             this.contextMenuClick = new EventHandler(this.ContextMenu_Click);
             this.tray.ContextMenu.MenuItems.Add("Exit", this.contextMenuClick);
@@ -98,6 +100,8 @@ namespace rlel {
             this.tray.Visible = true;
             this.CheckRlelUpdate();
         }
+
+
         private void OnballoonEvent(string[] args, System.Windows.Forms.ToolTipIcon tti)
         {
             this.ShowBalloon(args[0], args[1], tti);
@@ -166,7 +170,7 @@ namespace rlel {
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            this.tray.Visible = false;
+           this.tray.Visible = false;
         }
 
         private string GetTranqPath()
@@ -199,6 +203,7 @@ namespace rlel {
             return path;
         }
 
+        // changes the displayed eve path to correspond to the appropriate client
         private void SingularityClick(object sender, RoutedEventArgs e)
         {
             if (this.singularity.IsChecked == false)
@@ -211,7 +216,8 @@ namespace rlel {
             }
             this.tray.ContextMenu.MenuItems[1].Checked = (bool)this.singularity.IsChecked;
         }
-
+        
+        //called when the eve path is manually changed, updates the saved eve paths
         private void EvePathTextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             if (this.singularity.IsChecked == true)
@@ -226,6 +232,7 @@ namespace rlel {
             }
         }
 
+        //loads account info from disk and adds them to main UI and to the system tray context menu
         private void PopAccounts()
         {
             foreach (string credentials in Properties.Settings.Default.accounts)
@@ -239,7 +246,8 @@ namespace rlel {
                 this.accountsPanel.SelectedItem = this.accountsPanel.Items[0];
             }
         }
-
+        
+        //prompts user for password to decrypt account info, handles password resetting as well
         private string GetKey(HashAlgorithm hashAlgorithm)
         {
             UnlockDialog ud = new UnlockDialog();
@@ -255,6 +263,7 @@ namespace rlel {
             return (ud.Pass.Password);
         }
 
+        // sets a new password to encrypt account information with
         private string SetKey()
         {
             UnlockDialog ud = new UnlockDialog();
@@ -264,6 +273,7 @@ namespace rlel {
             return (ud.Pass.Password);
         }
 
+        //checks if the given password is correct, returns true if so, otherwise returns false
         private Boolean CheckKey(string key, HashAlgorithm hashAlgorithm)
         {
             byte[] hashedkey = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(key));
@@ -273,11 +283,12 @@ namespace rlel {
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
                 return false;
             }
             return true;
         }
+
+        //returns either the stored IV for encryption/decryption, or generates a new one.
         private string GetIV()
         {
             if (Properties.Settings.Default.IV != null && Properties.Settings.Default.IV != "")
@@ -310,7 +321,7 @@ namespace rlel {
             string dstring = Encoding.Unicode.GetString(outblock);
             return dstring;
         }
-
+        // handles un-minimizing window on left clicking icon in tray
         private void TrayClick(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
@@ -320,6 +331,7 @@ namespace rlel {
             }
         }
 
+        //handles right clicking icon in tray, will launch accounts, exit the app, or toggle between singularity/tranquility
         private void ContextMenu_Click(object sender, EventArgs e)
         {
             string username = ((System.Windows.Forms.MenuItem)sender).Text;
@@ -343,6 +355,7 @@ namespace rlel {
             }
         }
 
+        // adds accounts to system tray context menu for easy launching
         private void PopContextMenu()
         {
             while (this.tray.ContextMenu.MenuItems.Count > 3)
@@ -361,6 +374,7 @@ namespace rlel {
             this.tray.ShowBalloonTip(1000, title, text, icon);
         }
 
+        //call this whenever credentials are changed, saves everything to file
         public void UpdateCredentials()
         {
             StringCollection accounts = new StringCollection();
@@ -374,6 +388,7 @@ namespace rlel {
             this.PopContextMenu();
         }
 
+        //returns true if the given root install directory is correct
         private bool CheckFilePaths(string path)
         {
             string exeFilePath;
@@ -381,6 +396,7 @@ namespace rlel {
             return File.Exists(exeFilePath);
         }
 
+        // updates the displayed username when a new account is selected in the UI
         private void AccountsPanel_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if (this.accountsPanel.SelectedItem != null)
@@ -392,11 +408,12 @@ namespace rlel {
             }
         }
 
+        //will automatically select a settings profile if only one is available, otherwise will prompt user to choose which profile to use
         private void SetEveSettingsProfiles(Account acct)
         {
             string appdata = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             string mainSettingsDir = Directory.EnumerateDirectories(Path.Combine(appdata, "CCP", "EVE"), "*_tranquility").First<string>();
-
+            //get only directories beginning with "settings_", these are the available settings profiles
             IEnumerable<string> dirs = Directory.EnumerateDirectories(mainSettingsDir, "settings_*");
 
             SettingsDialog sd = new SettingsDialog(acct);
@@ -407,6 +424,7 @@ namespace rlel {
                 sd.SettingsDirectories.Items.Add(shortname);
 
             }
+            //if there's more than one option, let the user choose, otherwise default to the only option
             if (dirs.Count() > 1)
             {
 
@@ -431,6 +449,7 @@ namespace rlel {
             }
         }
 
+        //launches a given account on either sisi or tranquility
         private void LaunchAccount(bool sisi, string path, Account acct)
         {
             this.ShowBalloon("Launching...", acct.username.Text, System.Windows.Forms.ToolTipIcon.Info);
@@ -563,13 +582,14 @@ namespace rlel {
             reqStream.Write(body, 0, body.Length);
             reqStream.Close();
             HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
-
+            // if the responseuri fragment length is 0, 2fa is enabled, this code handles it
             if (resp.ResponseUri.Fragment.Length == 0)
             {
                 resp.Close();
                 Authenticator auth = new Authenticator(acct);
                 auth.ShowDialog();
                 auth.authCode.Focus();
+                // uri is different, and requires a different request.
                 uri = "https://login.eveonline.com/account/authenticator?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Flogin.eveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken%20user";
                 req = (HttpWebRequest)HttpWebRequest.Create(uri);
                 req.Referer = "https://login.eveonline.com/Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Flogin.eveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken%20user";
@@ -578,6 +598,7 @@ namespace rlel {
                 if (!sisi)
                     req.Headers.Add("Origin", "https://login.eveonline.com");
                 req.Referer = uri;
+                // maintain cookies across requests, otherwise the authentication fails
                 req.CookieContainer = cook;
                 req.Method = "POST";
                 req.ContentType = "application/x-www-form-urlencoded";
@@ -621,6 +642,7 @@ namespace rlel {
             Account acct = (Account)this.accountsPanel.SelectedItem;
             this.SetEveSettingsProfiles(acct);
         }
+
         //save credentials when return is pressed in either input box
         private void User_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
@@ -629,7 +651,9 @@ namespace rlel {
                 this.SaveClick(this, e);
             }
         }
-        // check if local version is >= remote
+
+        // check if local version is >= remote, if yes, prompt user that update is available
+        //only run this code on launch
         private void CheckRlelUpdate()
         {
             Boolean upToDate = true;
@@ -638,14 +662,13 @@ namespace rlel {
             localVersion[0] = fvi.ProductMajorPart;
             localVersion[1] = fvi.ProductMinorPart;
             localVersion[2] = fvi.ProductBuildPart;
+
+            // get the latest release tag from github's API, this is the version we're checking against
             HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create("https://api.github.com/repos/frosty-nee/rlel/releases/latest");
             req.Timeout = 5000;
             req.Method = "GET";
             req.UserAgent = String.Format("Rapid Light EVE Launcher v{0}",fvi.FileVersion );
             req.ContentType = "text/html";
-
-
-
             HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
             using (Stream responseStream= resp.GetResponseStream())
             using (StreamReader reader = new StreamReader(responseStream))

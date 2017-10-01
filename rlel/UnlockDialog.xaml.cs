@@ -37,6 +37,7 @@ namespace rlel
 
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
+            //if the user clicks to reset password, purge all account and key info, prompt for new password.
             Properties.Settings.Default.accounts = null;
             Properties.Settings.Default.IV = null;
             Properties.Settings.Default.Key = null;
