@@ -280,12 +280,13 @@ namespace rlel {
             try
             {
                 this.rjm.Key = hashedkey;
+                if (this.DecryptPass(Properties.Settings.Default.Key) == "this is a string")
+                    return true;
             }
             catch (Exception e)
             {
                 return false;
             }
-            return true;
         }
 
         //returns either the stored IV for encryption/decryption, or generates a new one.
