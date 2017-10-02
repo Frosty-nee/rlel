@@ -253,6 +253,7 @@ namespace rlel {
             UnlockDialog ud = new UnlockDialog();
             ud.Pass.Focus();
             ud.ShowDialog();
+            //If the password reset button is clicked, reset our encrypted test string to match the new password
             if (ud.reset)
             {
                 this.rjm.Key = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(ud.Pass.Password));
@@ -287,6 +288,7 @@ namespace rlel {
             {
                 return false;
             }
+            return false;
         }
 
         //returns either the stored IV for encryption/decryption, or generates a new one.
@@ -453,6 +455,8 @@ namespace rlel {
         //launches a given account on either sisi or tranquility
         private void LaunchAccount(bool sisi, string path, Account acct)
         {
+            if (acct.username.Text == "" || acct.password.Password == "")
+                return;
             this.ShowBalloon("Launching...", acct.username.Text, System.Windows.Forms.ToolTipIcon.Info);
             if (acct.SettingsDir == "" || acct.SettingsDir == null)
             {
@@ -623,7 +627,6 @@ namespace rlel {
                 acct.sisiToken = accessToken;
                 acct.sisiTokenExpiration = DateTime.UtcNow + TimeSpan.FromHours(11);
             }
-
             return accessToken;
         }
 
@@ -696,6 +699,3 @@ namespace rlel {
 
     }
 }
-
-
-
