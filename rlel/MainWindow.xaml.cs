@@ -99,7 +99,7 @@ namespace rlel {
             this.PopContextMenu();
             this.tray.Visible = true;
             this.CheckRlelUpdate();
-        }
+       }
 
 
         private void OnballoonEvent(string[] args, System.Windows.Forms.ToolTipIcon tti)
@@ -170,7 +170,7 @@ namespace rlel {
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-           this.tray.Visible = false;
+
         }
 
         private string GetTranqPath()
@@ -374,7 +374,7 @@ namespace rlel {
 
         public void ShowBalloon(string title, string text, System.Windows.Forms.ToolTipIcon icon)
         {
-            this.tray.ShowBalloonTip(1000, title, text, icon);
+            this.tray.ShowBalloonTip(10,title,text,icon);
         }
 
         //call this whenever credentials are changed, saves everything to file
@@ -455,9 +455,6 @@ namespace rlel {
         //launches a given account on either sisi or tranquility
         private void LaunchAccount(bool sisi, string path, Account acct)
         {
-            if (acct.username.Text == "" || acct.password.Password == "")
-                return;
-            this.ShowBalloon("Launching...", acct.username.Text, System.Windows.Forms.ToolTipIcon.Info);
             if (acct.SettingsDir == "" || acct.SettingsDir == null)
             {
                 this.SetEveSettingsProfiles(acct);
@@ -480,7 +477,6 @@ namespace rlel {
                 this.ShowBalloon("logging in", "missing username or password", System.Windows.Forms.ToolTipIcon.Error);
                 return;
             }
-            this.ShowBalloon("logging in", acct.username.Text, System.Windows.Forms.ToolTipIcon.None);
             string ssoToken = null;
             try
             {
@@ -497,7 +493,7 @@ namespace rlel {
                 this.ShowBalloon("logging in", "invalid username/password", System.Windows.Forms.ToolTipIcon.Error);
                 return;
             }
-            this.ShowBalloon("logging in", "launching", System.Windows.Forms.ToolTipIcon.None);
+            this.ShowBalloon("logging in", String.Format("launching {0}",acct.username.Text), System.Windows.Forms.ToolTipIcon.None);
             string args;
             if (sisi)
             {
