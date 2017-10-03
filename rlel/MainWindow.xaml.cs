@@ -284,9 +284,8 @@ namespace rlel {
                 if (this.DecryptPass(Properties.Settings.Default.Key) == "this is a string")
                     return true;
             }
-            catch (Exception e)
+            catch 
             {
-                return false;
             }
             return false;
         }
@@ -583,8 +582,9 @@ namespace rlel {
             reqStream.Write(body, 0, body.Length);
             reqStream.Close();
             HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
-            // if the responseuri fragment length is 0, 2fa is enabled, this code handles it
-            if (resp.ResponseUri.Fragment.Length == 0)
+			// if the responseuri fragment length is 0, 2fa is enabled or bad password, this code handles it
+			// if bad password, the only cookie set will have a value of "US", if it's not this, we know 2fa is enabled
+            if (resp.ResponseUri.Fragment.Length == 0 && resp.Cookies[0].Value.Length > 10)
             {
                 resp.Close();
                 Authenticator auth = new Authenticator(acct);
